@@ -25,7 +25,3 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
-
-
-if __name__ == "__main__":
-    db = get_db()

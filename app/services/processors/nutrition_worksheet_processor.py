@@ -8,12 +8,12 @@ from app.models.nutrition_entry import NutritionEntry
 
 
 class NutritionWorksheetProcessor:
+    model_type = NutritionEntry
+
     def process(
         self,
         worksheet: gspread.Worksheet,
     ) -> list[NutritionEntry]:
-        print(f"{worksheet.title} will be processed")
-
         nutrition_entries: list[NutritionEntry] = []
 
         for row in worksheet.get_all_records():

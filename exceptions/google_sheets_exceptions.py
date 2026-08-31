@@ -8,3 +8,7 @@ class WorksheetNotFoundError(Exception):
 
 class GoogleSheetsError(Exception):
     pass
+
+
+class GoogleSheetsAuthenticationError(Exception):
+    pass

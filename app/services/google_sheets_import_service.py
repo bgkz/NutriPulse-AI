@@ -8,6 +8,7 @@ from app.factory.repository_factory import RepositoryFactory
 from app.factory.worksheet_processor_factory import (
     WorksheetProcessorFactory,
 )
+from exceptions.google_sheets_exceptions import GoogleSheetsAuthenticationError
 
 
 class GoogleSheetsImportService:
@@ -23,20 +24,24 @@ class GoogleSheetsImportService:
         processor = WorksheetProcessorFactory.get_processor(
             worksheet_name=worksheet.title
         )
-
         entry_list = processor.process(worksheet)
+        repository = RepositoryFactory.get_repository(
+            model_type=processor.model_type, db=self.db
+        )
 
-        # repository.add(entry)
+        for entry in entry_list:
+            repository.add(entry)
 
 
+### Iwo testen
 if __name__ == "__main__":
     try:
+        db = next(database.get_db())
+
         client = GoogleSheetsClient()
-        import_service = GoogleSheetsImportService(
-            google_sheets_client=client, db=database.get_db()
-        )
+        import_service = GoogleSheetsImportService(google_sheets_client=client, db=db)
 
         import_service.import_all_worksheets(spreadsheet_id=GOOGLE_SHEET_SPREADSHEET_ID)
 
-    except Exception as error:
+    except GoogleSheetsAuthenticationError as error:
         print(error)

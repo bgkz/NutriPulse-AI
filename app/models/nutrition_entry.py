@@ -29,18 +29,3 @@ class NutritionEntry(Base):
 
     weight: Mapped[float | None]
     notes: Mapped[str | None]
-
-    def __repr__(self) -> str:
-        return (
-            f"NutritionEntry("
-            f"date={self.nutrition_date}, "
-            f"training={self.training!r}, "
-            f"steps={self.steps}, "
-            f"calories={self.calories}, "
-            f"protein={self.protein}, "
-            f"fat={self.fat}, "
-            f"carbs={self.carbs}, "
-            f"weight={self.weight}, "
-            f"notes={self.notes!r}"
-            f")"
-        )
