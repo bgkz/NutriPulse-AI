@@ -5,9 +5,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from app.config import DATABASE_URL
 from app.database import Base
-from app.models.exercise_notes_entry import ExerciseNotesEntry
 from app.models.exercise_sets_entry import ExerciseSetsEntry
-from app.models.exercise_type_entry import ExerciseTypeEntry
 from app.models.nutrition_entry import NutritionEntry
 
 # this is the Alembic Config object, which provides

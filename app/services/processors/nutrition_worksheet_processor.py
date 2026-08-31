@@ -5,6 +5,7 @@ from typing import Any
 import gspread
 
 from app.models.nutrition_entry import NutritionEntry
+from app.services.processors.worksheet_processor import WorksheetProcessor
 
 
 class NutritionWorksheetProcessor:
@@ -29,7 +30,7 @@ class NutritionWorksheetProcessor:
                 notes,
             ) = row.values()
 
-            parsed_date = self._parse_date(nutrition_date)
+            parsed_date = WorksheetProcessor._parse_date(nutrition_date)
 
             steps = self._parse_steps(cardio)
 
@@ -56,12 +57,6 @@ class NutritionWorksheetProcessor:
 
         return nutrition_entries
 
-    @staticmethod
-    def _parse_date(value: Any):
-        return datetime.strptime(  # noqa: DTZ007
-            f"{value}.2026",
-            "%d.%m.%Y",
-        ).date()
 
     @staticmethod
     def _parse_steps(value: Any) -> int | None:

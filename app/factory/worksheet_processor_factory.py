@@ -1,20 +1,20 @@
 from typing import ClassVar
 
+from app.services.processors.exercise_worksheet_processor import (
+    ExerciseWorksheetProcessor,
+)
 from app.services.processors.nutrition_worksheet_processor import (
     NutritionWorksheetProcessor,
 )
 from exceptions.processors_exceptions import (
     WorksheetProcessorNotFoundError,
 )
-from app.services.processors.training_worksheet_processor import (
-    TrainingWorksheetProcessor,
-)
 
 
 class WorksheetProcessorFactory:
     _processors: ClassVar[dict[str, type]] = {
         "Nutrition": NutritionWorksheetProcessor,
-        "Training": TrainingWorksheetProcessor,
+        "Training": ExerciseWorksheetProcessor,
     }
 
     @classmethod

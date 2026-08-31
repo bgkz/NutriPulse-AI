@@ -33,15 +33,15 @@ class GoogleSheetsImportService:
             repository.add(entry)
 
 
-### Iwo testen
-if __name__ == "__main__":
-    try:
-        db = next(database.get_db())
+# ### Iwo testen
+# if __name__ == "__main__":
+#     try:
+#         db = next(database.get_db())
 
-        client = GoogleSheetsClient()
-        import_service = GoogleSheetsImportService(google_sheets_client=client, db=db)
+#         client = GoogleSheetsClient()
+#         import_service = GoogleSheetsImportService(google_sheets_client=client, db=db)
 
-        import_service.import_all_worksheets(spreadsheet_id=GOOGLE_SHEET_SPREADSHEET_ID)
+#         import_service.import_all_worksheets(spreadsheet_id=GOOGLE_SHEET_SPREADSHEET_ID)
 
-    except GoogleSheetsAuthenticationError as error:
-        print(error)
+#     except GoogleSheetsAuthenticationError as error:
+#         print(error)

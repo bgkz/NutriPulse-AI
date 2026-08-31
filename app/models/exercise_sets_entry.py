@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
@@ -14,14 +15,12 @@ class ExerciseSetsEntry(Base):
         default=uuid.uuid4,
     )
 
-    exercise_date: Mapped[str] = mapped_column(
+    exercise_date: Mapped[date] = mapped_column(
         ForeignKey("nutritions.nutrition_date"), index=True
     )
-    exercise_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("exercise_types.id"), index=True
-    )
+    exercise_name: Mapped[str] = mapped_column(index=True)
 
     weight: Mapped[float]
-    repetitions = Mapped[int]
+    repetitions: Mapped[int]
 
-    reps_in_reserve = Mapped[int | None]
+    reps_in_reserve: Mapped[int | None]
