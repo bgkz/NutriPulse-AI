@@ -24,8 +24,8 @@ class GoogleSheetsImportService:
             worksheet_name=worksheet.title
         )
 
-        entry = processor.process(worksheet)
-        # repository = RepositoryFactory.get_repository(model_type=type(entry))
+        entry_list = processor.process(worksheet)
+
         # repository.add(entry)
 
 
