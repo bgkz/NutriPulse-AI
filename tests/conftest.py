@@ -5,7 +5,7 @@ import gspread
 import pytest
 from pytest import MonkeyPatch
 
-from app.api.integrations.google_sheets_client import GoogleSheetsClient
+from app.api.google_sheets_client import GoogleSheetsClient
 
 
 def fake_get_all_values() -> list[list[str]]:

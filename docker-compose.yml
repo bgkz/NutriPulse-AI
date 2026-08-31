@@ -1,12 +1,16 @@
 services:
   db:
     image: postgres:17
+    container_name: nutripulse-db
+
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app_db
+
     ports:
-      - "5432:5432"
+      - "5434:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

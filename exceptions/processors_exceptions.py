@@ -1,0 +1,2 @@
+class WorksheetProcessorNotFoundError(Exception):
+    pass

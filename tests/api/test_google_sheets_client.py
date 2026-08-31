@@ -4,7 +4,7 @@ import pytest
 from conftest import fake_get_all_values
 from gspread.exceptions import APIError, SpreadsheetNotFound, WorksheetNotFound
 
-from app.api.integrations.google_sheets_client import GoogleSheetsClient
+from app.api.google_sheets_client import GoogleSheetsClient
 from exceptions import google_sheets_exceptions
 
 
