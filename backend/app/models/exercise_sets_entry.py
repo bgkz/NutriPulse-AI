@@ -1,10 +1,9 @@
 import uuid
 from datetime import date
 
+from app.database import Base
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
-
-from app.database import Base
 
 
 class ExerciseSetsEntry(Base):
