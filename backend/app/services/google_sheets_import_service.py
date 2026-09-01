@@ -1,14 +1,10 @@
 import gspread
-from sqlalchemy.orm import Session
-
-from app import database
 from app.api.google_sheets_client import GoogleSheetsClient
-from app.config import GOOGLE_SHEET_SPREADSHEET_ID
 from app.factory.repository_factory import RepositoryFactory
 from app.factory.worksheet_processor_factory import (
     WorksheetProcessorFactory,
 )
-from exceptions.google_sheets_exceptions import GoogleSheetsAuthenticationError
+from sqlalchemy.orm import Session
 
 
 class GoogleSheetsImportService:
