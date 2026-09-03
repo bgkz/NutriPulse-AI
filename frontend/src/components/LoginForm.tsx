@@ -1,5 +1,5 @@
 import { useState } from "react";
-import RegistrationForm from "@/components/RegistrationForm";
+import RegistrationForm from "./RegistrationForm";
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -58,7 +58,6 @@ export default function LoginForm() {
               <RegistrationForm onSuccess={() => setShowRegisterForm(false)} />
             )}
           </>
-          ;
         </div>
       </div>
     </form>

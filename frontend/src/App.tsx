@@ -1,5 +1,5 @@
 import "./App.css";
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "./components/LoginForm";
 import { useState } from "react";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

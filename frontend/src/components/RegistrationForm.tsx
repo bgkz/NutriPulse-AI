@@ -41,7 +41,6 @@ export default function RegistrationForm({ onSuccess }: RegisterFormProps) {
   return (
     <div id="registerModal" className="modal">
       <div className="modal-content">
-        <span className="close-btn">&times;</span>
         <h2>Registrieren</h2>
         <form>
           <input
@@ -66,6 +65,12 @@ export default function RegistrationForm({ onSuccess }: RegisterFormProps) {
             onClick={(event) => handleRegistration(event, username, password)}
           >
             Konto erstellen
+          </button>
+          <button
+            style={{ cursor: "pointer" }}
+            className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-lg"
+          >
+            Schließen
           </button>
         </form>
       </div>
