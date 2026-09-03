@@ -12,3 +12,7 @@ class NutritionEntryAlreadyExist(Exception):
 
 class ExerciseSetEntryAlreadyExist(Exception):
     pass
+
+
+class UserAlreadyExist(Exception):
+    pass

@@ -1,8 +1,9 @@
 import { useState } from "react";
-
+import RegistrationForm from "@/components/RegistrationForm";
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
 
   function handleLogin(username: string, password: string) {
     alert(`Username: ${username}\nPassword: ${password}`);
@@ -44,7 +45,20 @@ export default function LoginForm() {
           >
             Login
           </button>
-          <button>Registrieren</button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowRegisterForm(true);
+            }}
+          >
+            Registrieren
+          </button>
+          <>
+            {showRegisterForm && (
+              <RegistrationForm onSuccess={() => setShowRegisterForm(false)} />
+            )}
+          </>
+          ;
         </div>
       </div>
     </form>

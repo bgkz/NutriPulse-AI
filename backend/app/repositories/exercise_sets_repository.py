@@ -1,11 +1,10 @@
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import Session
-
 from app.models.exercise_sets_entry import ExerciseSetsEntry
 from exceptions.repository_exceptions import (
     ExerciseSetEntryAlreadyExist,
     RepositoryError,
 )
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import Session
 
 
 class ExerciseSetsRepository:
