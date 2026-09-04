@@ -1,7 +1,11 @@
 import { useState } from "react";
 import RegistrationForm from "./RegistrationForm";
 
-export default function LoginForm() {
+type LoginFormProps = {
+  onSuccess: () => void;
+};
+
+export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showRegisterForm, setShowRegisterForm] = useState(false);
@@ -11,7 +15,29 @@ export default function LoginForm() {
     username: string,
     password: string,
   ) {
-    alert(`Username: ${username}\nPassword: ${password}`);
+    event.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
+
+      if (response.ok) {
+        alert("User: " + username + " erfolgriech angemeldet");
+        onSuccess();
+      } else {
+        const data = await response.json();
+        alert("Response not ok: " + data.detail);
+      }
+    } catch (error) {
+      alert("ERROR: " + error);
+    }
   }
 
   return (
@@ -38,6 +64,7 @@ export default function LoginForm() {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               placeholder="Dein Benutzername"
+              required
             />
           </label>
 
@@ -49,6 +76,7 @@ export default function LoginForm() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Dein Passwort"
+              required
             />
           </label>
 

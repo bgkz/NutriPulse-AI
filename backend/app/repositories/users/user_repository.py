@@ -23,3 +23,10 @@ class UserRepository:
         except PendingRollbackError as exc:
             self.db.rollback()
             raise RepositoryError("Database session was in invalid state") from exc
+
+    async def find_user_by_name(self, target_username: str) -> UserEntry | None:
+        try:
+            return self.db.query(UserEntry).filter_by(username=target_username).first()
+        except SQLAlchemyError as error:
+            self.db.rollback()
+            raise RepositoryError("Repository operation failed") from error

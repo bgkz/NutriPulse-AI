@@ -4,6 +4,13 @@ import { useState } from "react";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  return <>{!isLoggedIn && <LoginForm />}</>;
+  return (
+    <>{!isLoggedIn && <LoginForm onSuccess={() => setIsLoggedIn(true)} />}
+    
+    
+    
+    
+    </>
+  );
 }
 export default App;
