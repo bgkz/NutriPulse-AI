@@ -1,8 +1,8 @@
 import { useState } from "react";
 import RegistrationForm from "./RegistrationForm";
-
+import type { User } from "../types/user";
 type LoginFormProps = {
-  onSuccess: () => void;
+  onSuccess: (user: User) => void;
 };
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
@@ -29,11 +29,11 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       });
 
       if (response.ok) {
-        alert("User: " + username + " erfolgriech angemeldet");
-        onSuccess();
+        const user: User = await response.json();
+        onSuccess(user);
       } else {
         const data = await response.json();
-        alert("Response not ok: " + data.detail);
+        alert(data.detail);
       }
     } catch (error) {
       alert("ERROR: " + error);

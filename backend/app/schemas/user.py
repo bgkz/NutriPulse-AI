@@ -1,11 +1,11 @@
 import uuid
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CreateUser(BaseModel):
     username: str
-    password: str = Field(min_length=8, max_length=128)
+    password: str
 
 
 class CreateUserResponse(BaseModel):

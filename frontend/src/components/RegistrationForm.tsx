@@ -32,7 +32,7 @@ export default function RegistrationForm({ onSuccess }: RegisterFormProps) {
         onSuccess();
       } else {
         const data = await response.json();
-        alert(data.detail);
+        alert("Response was not ok: " + data.detail);
       }
     } catch (error) {
       alert("ERROR: " + error);
