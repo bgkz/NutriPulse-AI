@@ -1,5 +1,4 @@
 import uuid
-from datetime import date
 
 from app.database import Base
 from sqlalchemy import ForeignKey
