@@ -3,8 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from app.config import DATABASE_URL
 from app.database import Base
-from app.models.exercise_sets_entry import ExerciseSetsEntry
-from app.models.nutrition_entry import NutritionEntry
+from app.models.documents_entry import DocumentsEntry
 from app.models.user_entry import UserEntry
 from sqlalchemy import engine_from_config, pool
 
