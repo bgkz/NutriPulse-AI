@@ -1,12 +1,7 @@
-from datetime import datetime, timedelta, timezone
-
-import jwt
-from app.config import JWT_SECRET_KEY
 from app.core.security import create_access_token
 from app.database import get_db
-from app.models.user_entry import UserEntry
 from app.repositories.users.user_repository import UserRepository
-from app.schemas.auth import LoginRequest, LoginResponse
+from app.schemas.auth import LoginRequest
 from app.services.users.user_service import UserService
 from exceptions.repository_exceptions import RepositoryError
 from exceptions.service_exceptions import InvalidPasswordError, UserNotFoundError
