@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta, timezone
+
+import jwt
+from app.config import JWT_SECRET_KEY
+from app.core.security import create_access_token
 from app.database import get_db
 from app.models.user_entry import UserEntry
 from app.repositories.users.user_repository import UserRepository
@@ -11,14 +16,19 @@ from sqlalchemy.orm import Session
 router = APIRouter(prefix="/login")
 
 
-@router.post("/", status_code=status.HTTP_200_OK, response_model=LoginResponse)
+@router.post("/", status_code=status.HTTP_200_OK)
 async def login(
     user_login_request: LoginRequest,
     db: Session = Depends(get_db),  # noqa: B008
-) -> UserEntry:
+) -> dict:
     user_service = UserService(UserRepository(db=db))
     try:
-        return await user_service.find(user_login_request)
+        user_found = await user_service.find(user_login_request)
+        token = create_access_token(str(user_found.id))
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+        }
 
     except (InvalidPasswordError, UserNotFoundError):
         raise HTTPException(

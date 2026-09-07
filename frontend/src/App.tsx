@@ -3,26 +3,22 @@ import LoginForm from "./components/LoginForm";
 import Dashboard from "./components/dashboard/Dashboard";
 import { useState } from "react";
 
-import type { User } from "./types/user";
-
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen w-full">
       {!isLoggedIn && (
         <LoginForm
-          onSuccess={(user: User) => {
-            setUser(user);
+          onSuccess={(token: string) => {
+            setToken(token);
             setIsLoggedIn(true);
           }}
         />
       )}
 
-      {isLoggedIn && user && (
-        <Dashboard id={user.id} username={user.username} />
-      )}
+      {isLoggedIn && token && <Dashboard token={token} />}
     </div>
   );
 }

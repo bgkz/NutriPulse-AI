@@ -1,8 +1,11 @@
 import { useState } from "react";
 import RegistrationForm from "./RegistrationForm";
-import type { User } from "../types/user";
 type LoginFormProps = {
-  onSuccess: (user: User) => void;
+  onSuccess: (token: string) => void;
+};
+type LoginResponse = {
+  access_token: string;
+  token_type: string;
 };
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
@@ -29,8 +32,11 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       });
 
       if (response.ok) {
-        const user: User = await response.json();
-        onSuccess(user);
+        const data: LoginResponse = await response.json();
+
+        const token = data.access_token;
+
+        onSuccess(token);
       } else {
         const data = await response.json();
         alert(data.detail);
