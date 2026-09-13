@@ -3,8 +3,49 @@ type DashboardProps = {
   token: string;
 };
 
+type JobProps = {
+  job_id: string;
+  status: string;
+};
+
+type JobResultProps = {
+  status: string;
+  result: any;
+};
+
 export default function Dashboard({ token }: DashboardProps) {
   const [url, setUrl] = useState("");
+  const [jobId, setJobId] = useState<any>(null);
+  const [result, setResult] = useState<any>(null);
+
+  async function getJobStatus() {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/documents/jobs/${jobId}`,
+        {
+          method: "GET",
+        },
+      );
+
+      const data: JobResultProps = await response.json();
+
+      if (response.ok) {
+        if (data.status === "finished") {
+          setResult(data.result);
+          alert(JSON.stringify(data.result));
+        }
+
+        if (data.status === "failed") {
+          alert("Job failed");
+        }
+        if (data.status === "started") {
+          alert("Job stated, no results yet for ID: " + jobId);
+        }
+      }
+    } catch (error) {
+      alert("Error: " + error);
+    }
+  }
 
   async function handleUrlImport(url: string) {
     try {
@@ -17,12 +58,13 @@ export default function Dashboard({ token }: DashboardProps) {
         body: JSON.stringify({ url }),
       });
 
-      const data = await response.json();
+      const data: JobProps = await response.json();
 
       if (response.ok) {
-        alert("Response was successful: " + data.message);
+        alert("Response was successful: " + data.job_id);
+        setJobId(data.job_id);
       } else {
-        alert("Response was not successful: " + data.detail);
+        alert("Response was not successful: ");
       }
     } catch (error) {
       alert("Error: " + error);
@@ -51,6 +93,12 @@ export default function Dashboard({ token }: DashboardProps) {
         className="cursor-pointer rounded-xl bg-violet-600 px-4 py-3 font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:-translate-y-0.5 hover:bg-violet-700 focus:ring-4 focus:ring-violet-500/25 focus:outline-none"
       >
         Submit
+      </button>
+      <button
+        onClick={() => getJobStatus()}
+        className="cursor-pointer rounded-xl bg-violet-600 px-4 py-3 font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:-translate-y-0.5 hover:bg-violet-700 focus:ring-4 focus:ring-violet-500/25 focus:outline-none"
+      >
+        See Job Statuus
       </button>
     </div>
   );
