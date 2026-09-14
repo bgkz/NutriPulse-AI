@@ -1,105 +1,94 @@
-import { useState } from "react";
-type DashboardProps = {
-  token: string;
-};
+﻿import { useState } from "react";
+import "./Dashboard.css";
 
-type JobProps = {
-  job_id: string;
-  status: string;
-};
-
-type JobResultProps = {
-  status: string;
-  result: any;
-};
+type DashboardProps = { token: string };
 
 export default function Dashboard({ token }: DashboardProps) {
   const [url, setUrl] = useState("");
-  const [jobId, setJobId] = useState<any>(null);
-  const [result, setResult] = useState<any>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [result, setResult] = useState<unknown>(null);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   async function getJobStatus() {
+    if (!jobId || busy) return;
+    setBusy(true);
+    setError("");
     try {
-      const response = await fetch(
-        `http://localhost:8000/documents/jobs/${jobId}`,
-        {
-          method: "GET",
-        },
-      );
-
-      const data: JobResultProps = await response.json();
-
-      if (response.ok) {
-        if (data.status === "finished") {
-          setResult(data.result);
-          alert(JSON.stringify(data.result));
-        }
-
-        if (data.status === "failed") {
-          alert("Job failed");
-        }
-        if (data.status === "started") {
-          alert("Job stated, no results yet for ID: " + jobId);
-        }
-      }
+      const response = await fetch(`http://localhost:8000/documents/jobs/${jobId}`);
+      if (!response.ok) throw new Error("Der Status konnte nicht geladen werden. Versuche es erneut.");
+      const data: { status: string; result: unknown } = await response.json();
+      setStatus(data.status);
+      if (data.status === "finished") setResult(data.result);
     } catch (error) {
-      alert("Error: " + error);
-    }
+      setError(error instanceof Error ? error.message : "Der Server ist nicht erreichbar.");
+    } finally { setBusy(false); }
   }
 
-  async function handleUrlImport(url: string) {
+  async function handleUrlImport() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
     try {
       const response = await fetch("http://localhost:8000/documents/", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url }),
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url.trim() }),
       });
-
-      const data: JobProps = await response.json();
-
-      if (response.ok) {
-        alert("Response was successful: " + data.job_id);
-        setJobId(data.job_id);
-      } else {
-        alert("Response was not successful: ");
-      }
+      if (!response.ok) throw new Error("Der Import konnte nicht gestartet werden. Prüfe den Link und die Freigabe deiner Tabelle.");
+      const data: { job_id: string; status: string } = await response.json();
+      if (!data.job_id) throw new Error("Der Server hat keine Import-ID zurückgegeben.");
+      setJobId(data.job_id);
+      setStatus(data.status);
+      setResult(null);
     } catch (error) {
-      alert("Error: " + error);
-    }
+      setError(error instanceof Error ? error.message : "Der Server ist nicht erreichbar.");
+    } finally { setBusy(false); }
   }
 
+  const statusLabel = status === "finished" ? "Abgeschlossen" : ["failed", "stopped", "canceled"].includes(status) ? "Nicht abgeschlossen" : status === "started" ? "Wird analysiert" : "In der Warteschlange";
+
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center gap-6 min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-violet-100 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950">
-      <span>Hello {token} ---</span>
-
-      <div className="flex flex-col items-center justify-center gap-2 p-4 bg-white/50 dark:bg-slate-900/50 rounded-xl shadow-sm">
-        <span>Meine Dokumente (0)</span>
-      </div>
-
-      <div>
-        <label>URL</label>
-        <input
-          type="url"
-          placeholder="https://example.com"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-        />
-      </div>
-      <button
-        onClick={() => handleUrlImport(url)}
-        className="cursor-pointer rounded-xl bg-violet-600 px-4 py-3 font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:-translate-y-0.5 hover:bg-violet-700 focus:ring-4 focus:ring-violet-500/25 focus:outline-none"
-      >
-        Submit
-      </button>
-      <button
-        onClick={() => getJobStatus()}
-        className="cursor-pointer rounded-xl bg-violet-600 px-4 py-3 font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:-translate-y-0.5 hover:bg-violet-700 focus:ring-4 focus:ring-violet-500/25 focus:outline-none"
-      >
-        See Job Statuus
-      </button>
+    <div className="np-dashboard">
+      <header className="np-header">
+        <a className="np-brand" href="#dashboard"><span className="np-logo" aria-hidden="true">ϟ</span><span>NutriPulse <small>AI</small></span></a>
+        <span className="np-header-label">Dein Ernährungsworkspace</span>
+        <span className="np-account"><i /> Angemeldet</span>
+      </header>
+      <main id="dashboard" className="np-main">
+        <div className="np-intro"><span className="np-eyebrow">DEIN DASHBOARD</span><h1>Gute Ernährung beginnt<br />mit einem <span>klaren Überblick.</span></h1><p>Bringe deine Ernährungsdaten an einen Ort.<br />Den nächsten Schritt übernimmt die KI.</p></div>
+        <div className="np-grid">
+          <section className="np-card np-import" aria-labelledby="import-heading">
+            <div className="np-card-top"><span className="np-icon" aria-hidden="true">↗</span><span className="np-badge">GOOGLE SHEETS</span></div>
+            <h2 id="import-heading">Deine Daten. Neue Einblicke.</h2>
+            <p>Importiere deine Tabelle und lass NutriPulse deine Ernährungsdaten aufbereiten.</p>
+            <form onSubmit={(event) => { event.preventDefault(); void handleUrlImport(); }}>
+              <label htmlFor="import-url">Link zu deiner Tabelle</label>
+              <input id="import-url" type="url" placeholder="https://docs.google.com/spreadsheets/…" value={url} onChange={(event) => setUrl(event.target.value)} required disabled={busy} />
+              <p className="np-hint">Deine Tabelle muss für den Zugriff freigegeben sein.</p>
+              <button className="np-primary" type="submit" disabled={busy || !url.trim()}>{busy ? "Bitte warten …" : "Tabelle importieren"}<span aria-hidden="true">→</span></button>
+            </form>
+            {error && <p className="np-error" role="alert">{error}</p>}
+            <div className="np-import-footer"><span aria-hidden="true">✧</span> KI-gestützte Aufbereitung deiner Daten</div>
+          </section>
+          <aside className="np-guide" aria-labelledby="guide-heading">
+            <span className="np-eyebrow">WENIGER AUFWAND. MEHR ÜBERBLICK.</span>
+            <h2 id="guide-heading">Von deiner Tabelle<br />zu mehr Klarheit.</h2>
+            <ol>{[
+              ["Link einfügen", "Verbinde deine Google-Sheets-Tabelle mit NutriPulse."],
+              ["Analyse starten", "Die KI bereitet deine Ernährungsdaten für dich auf."],
+              ["Ergebnis entdecken", "Prüfe den Status und sieh dir das Ergebnis direkt hier an."],
+            ].map(([title, description], index) => <li key={title}><span className="np-step">0{index + 1}</span><div><h3>{title}</h3><p>{description}</p></div></li>)}</ol>
+            <div className="np-guide-note">Deine Ernährung im Blick.<br /><strong>Ein Import nach dem anderen.</strong></div>
+          </aside>
+        </div>
+        <section className="np-card np-documents" aria-labelledby="documents-heading">
+          <h2 id="documents-heading">Aktueller Import</h2><p>Status und Ergebnis deines letzten Imports in dieser Sitzung.</p>
+          {!jobId ? <div className="np-empty"><span className="np-empty-icon" aria-hidden="true">≡</span><h3>Platz für deinen ersten Einblick</h3><p>Füge oben einen Tabellen-Link ein, um loszulegen.</p><a href="#import-url">Erste Tabelle importieren <span aria-hidden="true">→</span></a></div> : <div className="np-job"><div className="np-job-row"><div aria-live="polite"><span className="np-badge">{statusLabel}</span><p className="np-job-id">Import-ID: {jobId}</p></div><button className="np-secondary" type="button" onClick={() => void getJobStatus()} disabled={busy}>{busy ? "Bitte warten …" : "Status aktualisieren"}</button></div>{status === "failed" && <p className="np-error" role="alert">Die Analyse ist fehlgeschlagen. Starte den Import oben erneut.</p>}{status === "finished" && <div className="np-result"><h3>Dein Analyseergebnis</h3><pre>{result == null ? "Der Import wurde ohne Ergebnis abgeschlossen." : typeof result === "string" ? result : JSON.stringify(result, null, 2)}</pre></div>}</div>}
+        </section>
+        <footer className="np-footer"><span>NutriPulse AI</span><span>Mehr verstehen. Bewusster essen.</span></footer>
+      </main>
     </div>
   );
 }
