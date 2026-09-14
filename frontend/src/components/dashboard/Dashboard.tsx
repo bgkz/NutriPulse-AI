@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import "./Dashboard.css";
+import ChatTemplate from "./ChatTemplate";
 
 type DashboardProps = { token: string };
 
@@ -72,16 +73,7 @@ export default function Dashboard({ token }: DashboardProps) {
             {error && <p className="np-error" role="alert">{error}</p>}
             <div className="np-import-footer"><span aria-hidden="true">✧</span> KI-gestützte Aufbereitung deiner Daten</div>
           </section>
-          <aside className="np-guide" aria-labelledby="guide-heading">
-            <span className="np-eyebrow">WENIGER AUFWAND. MEHR ÜBERBLICK.</span>
-            <h2 id="guide-heading">Von deiner Tabelle<br />zu mehr Klarheit.</h2>
-            <ol>{[
-              ["Link einfügen", "Verbinde deine Google-Sheets-Tabelle mit NutriPulse."],
-              ["Analyse starten", "Die KI bereitet deine Ernährungsdaten für dich auf."],
-              ["Ergebnis entdecken", "Prüfe den Status und sieh dir das Ergebnis direkt hier an."],
-            ].map(([title, description], index) => <li key={title}><span className="np-step">0{index + 1}</span><div><h3>{title}</h3><p>{description}</p></div></li>)}</ol>
-            <div className="np-guide-note">Deine Ernährung im Blick.<br /><strong>Ein Import nach dem anderen.</strong></div>
-          </aside>
+          <ChatTemplate />
         </div>
         <section className="np-card np-documents" aria-labelledby="documents-heading">
           <h2 id="documents-heading">Aktueller Import</h2><p>Status und Ergebnis deines letzten Imports in dieser Sitzung.</p>
