@@ -15,4 +15,4 @@ class DocumentsEntry(Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
 
-    path: Mapped[str]
+    url: Mapped[str]

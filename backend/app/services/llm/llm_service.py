@@ -1,9 +1,7 @@
 import json
 
-import openai
 from app.config import OPENAI_API_KEY
 from app.schemas.fitness import FitnessEntries
-from app.services.llm import settings
 from openai import AsyncOpenAI
 
 
@@ -20,11 +18,21 @@ class LLMService:
                 Normalize the provided fitness data.
 
                 Identify nutrition and workout data.
+
+                Pay close attention to dates:
+                - Preserve the correct date for each data entry.
+                - Associate nutrition and workout data with the exact date they belong to.
+                - Do not move, merge, or assign data to a different date.
+                - If a date cannot be determined reliably, use null.
+                - Preserve the original date information in notes if it is ambiguous.
+
                 Do not invent values.
                 Use null when a field cannot be determined.
                 Convert units into the schema's units.
                 Preserve uncertain information in notes.
-                If any error happens while converting, please return "Error returned while converting data"
+
+                If any error happens while converting, return exactly:
+                "Error returned while converting data"
                 """,
                 text_format=FitnessEntries,
             )

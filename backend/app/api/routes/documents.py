@@ -3,6 +3,7 @@ from app.database import get_db
 from app.jobs.llm_service_jobs import parse_data_with_llm
 from app.queue import queue, redis_connection
 from app.schemas.documents import UrlImportRequest
+from app.schemas.fitness import FitnessEntries
 from app.services.google.google_service import GoogleService
 from exceptions.google_service_exceptions import (
     GoogleSheetsError,
@@ -37,8 +38,6 @@ async def import_url(
         sheets_data = google_service.load(data.url)
 
         job = queue.enqueue(parse_data_with_llm, sheets_data)
-
-        print(job.id)
         return {"job_id": job.id, "status": job.get_status()}
 
     except InvalidAccessTokenError as error:
@@ -56,6 +55,9 @@ def get_job(job_id: str):
     if not job.is_finished:
         return {"status": job.get_status(), "result": None}
 
-    print(job.result)
+    fitness_entries = FitnessEntries.model_validate(job.result)
+
+    print(f"Nutritions: {fitness_entries.nutrition}")
+    print(f"Workout: {fitness_entries.workouts}")
 
     return {"status": job.get_status(), "result": job.result}
