@@ -6,6 +6,7 @@ from app.database import Base
 from app.models.documents_entry import DocumentsEntry
 from app.models.nutritions_entry import NutritionsEntry
 from app.models.user_entry import UserEntry
+from app.models.workouts_entry import WorkoutsEntry
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
