@@ -24,6 +24,8 @@ class DocumentsEntry(Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
 
+    job_id: Mapped[uuid.UUID] = mapped_column(index=True)
+
     url: Mapped[str]
 
     imported_at: Mapped[datetime.date] = mapped_column(

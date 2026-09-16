@@ -18,8 +18,8 @@ class WorkoutsEntry(Base):
         ForeignKey("documents.id"), index=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    date: Mapped[datetime.date | None] = mapped_column(index=True)
 
+    date: Mapped[datetime.date | None] = mapped_column(index=True)
     exercise: Mapped[str | None]
     weight_kg: Mapped[float | None]
     reps_in_set_one: Mapped[int | None]
@@ -27,3 +27,4 @@ class WorkoutsEntry(Base):
     reps_in_set_three: Mapped[int | None]
     rest_in_reserve_min: Mapped[int | None]
     rest_in_reserve_max: Mapped[int | None]
+    notes: Mapped[str | None]

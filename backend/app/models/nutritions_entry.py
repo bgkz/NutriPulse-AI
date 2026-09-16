@@ -21,9 +21,9 @@ class NutritionsEntry(Base):
     date: Mapped[datetime.date | None] = mapped_column(unique=True)
 
     calories: Mapped[int | None]
-    protein: Mapped[int | None]
-    carbs: Mapped[int | None]
-    fat: Mapped[int | None]
+    protein_g: Mapped[int | None]
+    carbs_g: Mapped[int | None]
+    fat_g: Mapped[int | None]
     bodyweight_kg: Mapped[float | None]
     steps: Mapped[int | None]
     notes: Mapped[str | None]

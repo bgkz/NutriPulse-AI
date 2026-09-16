@@ -10,9 +10,13 @@ class NutritionEntryAlreadyExist(Exception):
     pass
 
 
-class ExerciseSetEntryAlreadyExist(Exception):
+class WorkoutsEntryAlreadyExist(Exception):
     pass
 
 
 class UserAlreadyExist(Exception):
+    pass
+
+
+class DocumentAlreadyExist(Exception):
     pass

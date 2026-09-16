@@ -4,3 +4,7 @@ class UserNotFoundError(Exception):
 
 class InvalidPasswordError(Exception):
     pass
+
+
+class DocumentWithJobIDNotFound(Exception):
+    pass
