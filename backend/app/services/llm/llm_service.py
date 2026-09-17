@@ -73,6 +73,7 @@ class LLMService:
                 - Preserve uncertain information in notes.
                 """,
                 text_format=FitnessEntries,
+                temperature=0.0,
             )
 
             return response.output_parsed
