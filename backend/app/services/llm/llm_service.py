@@ -1,8 +1,8 @@
 import json
 
-import settings
 from app.config import OPENAI_API_KEY
 from app.schemas.fitness import FitnessEntries
+from app.services.llm import settings
 from openai import AsyncOpenAI
 
 
