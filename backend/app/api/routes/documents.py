@@ -28,6 +28,8 @@ from sqlalchemy.orm import Session
 router = APIRouter(prefix="/documents")
 
 
+
+
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
 def import_url(
     data: UrlImportRequest,
@@ -57,16 +59,16 @@ def import_url(
         )
 
 
+
 @router.get("/jobs/{job_id}")
 def get_job(job_id: str, db: Session = Depends(get_db)):  # noqa: B008
     try:
         job = Job.fetch(job_id, connection=redis_connection)
 
-        print(job.get_status(), job.func_name)
+        print(job.get_status())
 
         if job.is_finished:
             return {"status": job.get_status(), "result": job.result}
-
         if job.is_failed:
             return {"status": "failed", "error": job.exc_info}
         if not job.is_finished:

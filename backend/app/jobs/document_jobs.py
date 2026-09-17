@@ -31,6 +31,12 @@ def update_document_processing_status_to_success(
         added_document_job_id, connection=redis_connection
     ).result
 
+    return complete_document_import(document, parsed_data)
+
+
+def complete_document_import(
+    document: DocumentsEntry, parsed_data: dict[str, Any]
+) -> dict[str, Any]:
     with SessionLocal() as db:
         stored_document = db.get(DocumentsEntry, document.id)
         if stored_document is None:

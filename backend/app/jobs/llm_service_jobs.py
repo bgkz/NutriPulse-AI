@@ -14,6 +14,10 @@ def parse_data_with_llm(previous_job_id: str):
     )
 
     data = previous_job.result
+    return parse_sheets_data(data)
+
+
+def parse_sheets_data(data):
 
     if LLM_MODE == "mock":
         file_path = STORAGE_DIR / "llm_parsed_entries.json"

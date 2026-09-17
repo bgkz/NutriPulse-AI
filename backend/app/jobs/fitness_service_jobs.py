@@ -22,6 +22,10 @@ def save_parsed_fitness_entries_in_db(
         save_document_job_id, connection=redis_connection
     ).result
 
+    save_fitness_entries(parsed_data, document)
+
+
+def save_fitness_entries(parsed_data, document: DocumentsEntry):
     fitness_entries = FitnessEntries.model_validate(parsed_data)
     with SessionLocal() as db:
         nutrition_service = NutritionsService(NutritionRepository(db=db))
