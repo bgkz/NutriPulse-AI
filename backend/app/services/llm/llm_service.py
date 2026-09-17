@@ -1,5 +1,6 @@
 import json
 
+import settings
 from app.config import OPENAI_API_KEY
 from app.schemas.fitness import FitnessEntries
 from openai import AsyncOpenAI
@@ -12,7 +13,7 @@ class LLMService:
     async def get_llm_response(self, data):
         try:
             response = await self.client.responses.parse(
-                model="gpt-5.6-terra",
+                model=settings.GPT_MODEL,
                 input=json.dumps(data, ensure_ascii=False),
                 instructions="""
                 Normalize the provided fitness data.
@@ -73,7 +74,7 @@ class LLMService:
                 - Preserve uncertain information in notes.
                 """,
                 text_format=FitnessEntries,
-                temperature=0.0,
+                temperature=settings.GPT_TEMPERATURE,
             )
 
             return response.output_parsed

@@ -1,0 +1,2 @@
+GPT_MODEL = "gpt-5.6-terra"
+GPT_TEMPERATURE = 0.0
