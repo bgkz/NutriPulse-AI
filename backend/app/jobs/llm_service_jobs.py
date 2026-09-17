@@ -1,13 +1,21 @@
 import asyncio
 
 from app.config import LLM_MODE, STORAGE_DIR
+from app.queue import redis_connection
 from app.schemas.fitness import FitnessEntries
 from app.services.llm.llm_service import LLMService
+from rq.job import Job
 
 
-def parse_data_with_llm(data):
+def parse_data_with_llm(previous_job_id: str):
+    previous_job = Job.fetch(
+        previous_job_id,
+        connection=redis_connection,
+    )
+
+    data = previous_job.result
+
     if LLM_MODE == "mock":
-        print("Bin im Mock")
         file_path = STORAGE_DIR / "llm_parsed_entries.json"
         parsed_data = FitnessEntries.model_validate_json(
             file_path.read_text(encoding="utf-8")

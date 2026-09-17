@@ -19,4 +19,6 @@ class NutritionRepository:
             raise NutritionEntryAlreadyExist("Nutrition already exist") from error
         except SQLAlchemyError as error:
             self.db.rollback()
-            raise RepositoryError("Nutrition already exist") from error
+            raise RepositoryError(
+                "Adding nutrition entry operation failed: ", error
+            ) from error

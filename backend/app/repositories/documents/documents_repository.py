@@ -20,7 +20,9 @@ class DocumentsRepository:
             raise DocumentAlreadyExist("document already exist") from error
         except SQLAlchemyError as error:
             self.db.rollback()
-            raise RepositoryError("Adding document operation failed") from error
+            raise RepositoryError(
+                "Adding document operation failed: ", error
+            ) from error
 
     def find_document_by_job_id(self, job_id: str) -> DocumentsEntry | None:
         stmt = select(DocumentsEntry).where(DocumentsEntry.job_id == job_id)

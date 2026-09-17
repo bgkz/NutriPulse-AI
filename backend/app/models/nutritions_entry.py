@@ -15,9 +15,13 @@ class NutritionsEntry(Base):
     )
 
     document_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("documents.id"), index=True
+        ForeignKey("documents.id"),
+        index=True,
     )
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id"),
+        index=True,
+    )
     date: Mapped[datetime.date | None] = mapped_column(unique=True)
 
     calories: Mapped[int | None]

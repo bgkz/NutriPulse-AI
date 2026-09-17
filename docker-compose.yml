@@ -20,9 +20,13 @@ services:
       - "6379:6379"
   worker:
     build: ./backend
+    container_name: nutripulse-worker
     command: rq worker --url redis://redis:6379
     depends_on:
       - redis
+    environment:
+      REDIS_HOST: redis
+      DATABASE_URL: postgresql+psycopg://app:app@db:5432/app_db
 
 volumes:
   postgres_data:
