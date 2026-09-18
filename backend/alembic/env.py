@@ -5,6 +5,7 @@ from app.config import DATABASE_URL
 from app.database import Base
 from app.models.conversation_entry import ConversationEntry
 from app.models.documents_entry import DocumentsEntry
+from app.models.message_entry import MessageEntry
 from app.models.nutritions_entry import NutritionsEntry
 from app.models.user_entry import UserEntry
 from app.models.workouts_entry import WorkoutsEntry

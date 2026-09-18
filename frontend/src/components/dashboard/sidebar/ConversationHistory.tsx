@@ -39,7 +39,7 @@ export default function ConversationHistory({
       )}
       <div className="np-conversation-history-card">
         {conversations.map((conversation) => (
-          <ConversationCard key={conversation.id} conversation={conversation} />
+          <ConversationCard key={conversation.id} conversation={conversation}/>
         ))}
       </div>
     </div>

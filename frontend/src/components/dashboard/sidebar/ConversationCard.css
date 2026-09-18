@@ -1,0 +1,48 @@
+.np-conversation-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #f2efff;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+  cursor: pointer;
+}
+
+.np-conversation-card-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgb(196 181 253 / 9%);
+  color: #ddd6fe;
+}
+
+.np-conversation-card-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+@media (hover: hover) {
+  .np-conversation-card:hover {
+    border-color: rgb(167 139 250 / 25%);
+    background: rgb(167 139 250 / 12%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .np-conversation-card {
+    transition: none;
+  }
+}

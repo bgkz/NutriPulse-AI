@@ -1,6 +1,9 @@
+import { useState } from "react";
 import "./ChatWindow.css";
 
 export default function ChatWindow() {
+  const [userMessage, setUserMessage] = useState("");
+
   return (
     <section className="chat-window" aria-labelledby="chat-window-title">
       <div className="chat-window-welcome">
@@ -15,7 +18,6 @@ export default function ChatWindow() {
         </p>
       </div>
 
-      {/* Template: Nachrichten und Event-Handler kannst du hier ergänzen. */}
       <div className="chat-window-composer">
         <div className="chat-window-input-row">
           <button
@@ -41,6 +43,8 @@ export default function ChatWindow() {
             type="text"
             aria-label="Nachricht"
             placeholder="Schreibe deine Nachricht..."
+            value={userMessage}
+            onChange={(event) => setUserMessage(event.target.value)}
           />
           <button
             type="button"

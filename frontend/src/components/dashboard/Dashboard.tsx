@@ -16,6 +16,8 @@ export default function Dashboard({ token }: DashboardProps) {
   const [busy, setBusy] = useState(false);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversation, setActiveConversation] =
+    useState<Conversation | null>(null);
 
   async function getJobStatus() {
     if (!jobId || busy) return;

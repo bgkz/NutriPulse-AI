@@ -21,8 +21,9 @@ def get_conversations(
         token = authorization.removeprefix("Bearer ")
         payload = decode_access_token(token)
         user_id = UUID(payload["sub"])
-        print(user_id)
         conversation_service = ConversationService(ConversationRepository(db=db))
+
+        print(user_id)
 
         return conversation_service.get_conversations_by_user(user_id)
 
