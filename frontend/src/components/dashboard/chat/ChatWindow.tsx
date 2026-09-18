@@ -1,22 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ChatWindow.css";
+import type { Conversation } from "@/types/conversation";
+import type { Message } from "@/types/message";
 
-export default function ChatWindow() {
+type ChatWindowProps = {
+  activeConversation: Conversation | null;
+};
+
+export default function ChatWindow({ activeConversation }: ChatWindowProps) {
+  const [messageHistory, setMessageHistory] = useState<Message[] | []>([]);
   const [userMessage, setUserMessage] = useState("");
 
+  async function loadMessageHistory(activeConversation: Conversation | null) {
+    if (activeConversation === null) return;
+    try {
+      const response = await fetch(
+        `http://localhost:8000/messages/${activeConversation.id}`,
+      );
+
+      const data: Message[] = await response.json();
+      setMessageHistory(data);
+    } catch (error) {
+      alert("Error occured while fetching conversations: " + error);
+    }
+  }
+
+  useEffect(() => {
+    void loadMessageHistory(activeConversation);
+  }, [activeConversation]);
+
   return (
-    <section className="chat-window" aria-labelledby="chat-window-title">
-      <div className="chat-window-welcome">
-        <div className="chat-window-icon" aria-hidden="true">
-          ✧
+    <section className="chat-window" aria-label="Chatverlauf">
+      {messageHistory.length === 0 && (
+        <div className="chat-window-welcome">
+          <div className="chat-window-icon" aria-hidden="true">
+            ✧
+          </div>
+
+          <h2 id="chat-window-title">Stelle deine erste Frage</h2>
+
+          <p>
+            NutriPulse analysiert deine Daten, gibt dir individuelle
+            Empfehlungen und beantwortet all deine Fragen rund um Ernährung,
+            Fitness und Gesundheit.
+          </p>
         </div>
-        <h2 id="chat-window-title">Stelle deine erste Frage</h2>
-        <p>
-          NutriPulse analysiert deine Daten, gibt dir individuelle Empfehlungen
-          und beantwortet all deine Fragen rund um Ernährung, Fitness und
-          Gesundheit.
-        </p>
-      </div>
+      )}
+
+      {messageHistory.length > 0 && (
+        <div className="chat-window-messages">
+          {messageHistory.map((message) => (
+            <article
+              key={message.id}
+              className={`chat-message${message.role === "user" ? " chat-message-user" : ""}`}
+              aria-label={message.role === "user" ? "Du" : "NutriPulse AI"}
+            >
+              <p>{message.content}</p>
+            </article>
+          ))}
+        </div>
+      )}
 
       <div className="chat-window-composer">
         <div className="chat-window-input-row">

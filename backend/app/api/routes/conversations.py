@@ -2,7 +2,6 @@ from uuid import UUID
 
 from app.core.security import decode_access_token
 from app.database import get_db
-from app.models.conversation_entry import ConversationEntry
 from app.repositories.conversation_repository import ConversationRepository
 from app.services.conversation_service import ConversationService
 from exceptions.security_exceptions import InvalidAccessTokenError

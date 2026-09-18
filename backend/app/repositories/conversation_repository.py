@@ -13,6 +13,6 @@ class ConversationRepository:
         stmt = (
             select(ConversationEntry)
             .where(ConversationEntry.user_id == user_id)
-            .order_by((ConversationEntry.created_at).desc())
+            .order_by((ConversationEntry.created_at).asc())
         )
         return self.db.execute(statement=stmt).scalars().all()
