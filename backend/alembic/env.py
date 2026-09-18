@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from app.config import DATABASE_URL
 from app.database import Base
+from app.models.conversation_entry import ConversationEntry
 from app.models.documents_entry import DocumentsEntry
 from app.models.nutritions_entry import NutritionsEntry
 from app.models.user_entry import UserEntry

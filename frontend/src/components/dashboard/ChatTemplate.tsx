@@ -5,7 +5,30 @@ type Message = {
   content: string;
 };
 
-export default function ChatTemplate() {
+type ChatTemplateProps = { token: string };
+
+async function sendMessage(token: string, message: Message) {
+  try {
+    const response = await fetch("http://localhost:8000/chat/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
+    if (response.ok) {
+      alert("Response ok: " + response.json());
+    } else {
+      const data = await response.json();
+      alert(data.detail);
+    }
+  } catch (error) {
+    alert("ERROR: " + error);
+  }
+}
+
+export default function ChatTemplate({ token }: ChatTemplateProps) {
   const [userMessage, setUserMessage] = useState("");
 
   const [messageHistory, setMessageHistory] = useState<Message[]>([
@@ -25,7 +48,6 @@ export default function ChatTemplate() {
           <h2 id="chat-heading">Dein KI-Assistent</h2>
           <p>Raum für deine Ernährungsfragen</p>
         </div>
-        <span className="np-badge">VORSCHAU</span>
       </header>
 
       <div className="np-chat-messages" aria-label="Beispielunterhaltung">
@@ -58,13 +80,13 @@ export default function ChatTemplate() {
             className="np-secondary"
             aria-label="Nachricht senden"
             onClick={() => {
-              setMessageHistory((prev) => [
-                ...prev,
-                {
-                  role: "user",
-                  content: userMessage,
-                },
-              ]);
+              const message: Message = {
+                role: "user",
+                content: userMessage,
+              };
+
+              setMessageHistory((prev) => [...prev, message]);
+              sendMessage(token, message);
               setUserMessage("");
             }}
           >
