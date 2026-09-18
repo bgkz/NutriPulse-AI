@@ -19,9 +19,9 @@ class ConversationEntry(Base):
         index=True,
     )
 
-    title: Mapped[str | None] = mapped_column(unique=True)
+    title: Mapped[str | None] = mapped_column(nullable=True)
 
-    created_at: Mapped[datetime.date] = mapped_column(
-        default=datetime.date.today,
-        server_default=sa.func.current_date(),
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        nullable=False,
+        server_default=sa.func.now(),
     )

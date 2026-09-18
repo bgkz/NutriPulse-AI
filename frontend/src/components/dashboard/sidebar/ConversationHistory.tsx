@@ -1,6 +1,6 @@
 import type { Conversation } from "../../../types/conversation";
 import "./ConversationHistory.css";
-
+import ConversationCard from "./ConversationCard";
 type ConversationHistoryProps = {
   conversations: Conversation[];
 };
@@ -37,6 +37,11 @@ export default function ConversationHistory({
           </p>
         </div>
       )}
+      <div className="np-conversation-history-card">
+        {conversations.map((conversation) => (
+          <ConversationCard key={conversation.id} conversation={conversation} />
+        ))}
+      </div>
     </div>
   );
 }
