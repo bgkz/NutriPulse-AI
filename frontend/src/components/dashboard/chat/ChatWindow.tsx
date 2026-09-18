@@ -55,6 +55,12 @@ export default function ChatWindow({ activeConversation }: ChatWindowProps) {
               className={`chat-message${message.role === "user" ? " chat-message-user" : ""}`}
               aria-label={message.role === "user" ? "Du" : "NutriPulse AI"}
             >
+              <div className="chat-message-sender">
+                <span className="chat-message-avatar" aria-hidden="true">
+                  {message.role === "user" ? "Du" : "✧"}
+                </span>
+                {message.role === "user" ? "Du" : "NutriPulse AI"}
+              </div>
               <p>{message.content}</p>
             </article>
           ))}
