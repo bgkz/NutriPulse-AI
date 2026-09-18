@@ -1,8 +1,9 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import "./Dashboard.css";
 import "./sidebar/Sidebar.css";
 import ChatTemplate from "./ChatTemplate";
 import Sidebar from "./sidebar/Sidebar";
+import type { Conversation } from "../../types/conversation";
 type DashboardProps = { token: string };
 
 export default function Dashboard({ token }: DashboardProps) {
@@ -12,6 +13,8 @@ export default function Dashboard({ token }: DashboardProps) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   async function getJobStatus() {
     if (!jobId || busy) return;
@@ -73,6 +76,21 @@ export default function Dashboard({ token }: DashboardProps) {
     }
   }
 
+  async function loadConversations(token: string) {
+    try {
+      const response = await fetch("http://localhost:8000/conversations/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data: Conversation[] = await response.json();
+      setConversations(data);
+    } catch (error) {
+      alert("Error occured while fetching conversations: " + error);
+    }
+  }
+
   const statusLabel =
     status === "finished"
       ? "Abgeschlossen"
@@ -82,9 +100,13 @@ export default function Dashboard({ token }: DashboardProps) {
           ? "Wird analysiert"
           : "In der Warteschlange";
 
+  useEffect(() => {
+    void loadConversations(token);
+  }, [token]);
+
   return (
     <div className="np-dashboard">
-      <Sidebar></Sidebar>
+      <Sidebar conversations={conversations}></Sidebar>
       {/* <header className="np-header">
         <a className="np-brand" href="#dashboard">
           <span className="np-logo" aria-hidden="true">

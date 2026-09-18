@@ -1,6 +1,12 @@
 import { useState } from "react";
+import ConversationHistory from "./ConversationHistory";
+import type { Conversation } from "../../../types/conversation";
 
-export default function Sidebar() {
+type SidebarProps = {
+  conversations: Conversation[];
+};
+
+export default function Sidebar({ conversations }: SidebarProps) {
   const [searchInput, setSearchInput] = useState("");
 
   return (
@@ -49,6 +55,7 @@ export default function Sidebar() {
           }}
         />
       </div>
+      <ConversationHistory conversations={conversations}></ConversationHistory>
     </div>
   );
 }

@@ -1,0 +1,37 @@
+.np-conversation-history {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 20px 24px;
+}
+
+.np-conversation-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 8px;
+  text-align: center;
+}
+
+.np-conversation-history-empty-icon {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+  color: #a879ff;
+}
+
+.np-conversation-history-empty h2 {
+  margin: 0;
+  color: #f2efff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.np-conversation-history-empty p {
+  max-width: 260px;
+  margin: 0;
+  color: #b8b8d4;
+  font-size: 13px;
+  line-height: 1.65;
+}
