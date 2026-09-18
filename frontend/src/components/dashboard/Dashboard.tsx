@@ -3,6 +3,7 @@ import "./Dashboard.css";
 import "./sidebar/Sidebar.css";
 import ChatTemplate from "./ChatTemplate";
 import Sidebar from "./sidebar/Sidebar";
+import ChatWindow from "./chat/ChatWindow";
 import type { Conversation } from "../../types/conversation";
 type DashboardProps = { token: string };
 
@@ -107,6 +108,7 @@ export default function Dashboard({ token }: DashboardProps) {
   return (
     <div className="np-dashboard">
       <Sidebar conversations={conversations}></Sidebar>
+      <ChatWindow />
       {/* <header className="np-header">
         <a className="np-brand" href="#dashboard">
           <span className="np-logo" aria-hidden="true">
