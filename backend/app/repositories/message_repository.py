@@ -16,7 +16,7 @@ class MessageRepository:
         stmt = (
             select(MessageEntry)
             .where(MessageEntry.conversation_id == conversation_id)
-            .order_by((MessageEntry.created_at).desc())
+            .order_by((MessageEntry.created_at).asc())
         )
 
         return self.db.execute(statement=stmt).scalars().all()
