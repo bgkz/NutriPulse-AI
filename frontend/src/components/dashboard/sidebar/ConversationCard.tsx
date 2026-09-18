@@ -3,13 +3,19 @@ import "./ConversationCard.css";
 
 type ConversationCardProps = {
   conversation: Conversation;
+  onSelect: (conversation: Conversation) => void;
 };
 
 export default function ConversationCard({
   conversation,
+  onSelect,
 }: ConversationCardProps) {
   return (
-    <button className="np-conversation-card" type="button">
+    <button
+      className="np-conversation-card"
+      type="button"
+      onClick={() => onSelect(conversation)}
+    >
       <span className="np-conversation-card-icon" aria-hidden="true">
         <svg
           width="18"

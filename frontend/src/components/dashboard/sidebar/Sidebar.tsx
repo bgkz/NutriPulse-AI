@@ -4,9 +4,10 @@ import type { Conversation } from "../../../types/conversation";
 
 type SidebarProps = {
   conversations: Conversation[];
+  onSelect: (conversation: Conversation) => void;
 };
 
-export default function Sidebar({ conversations }: SidebarProps) {
+export default function Sidebar({ conversations, onSelect }: SidebarProps) {
   const [searchInput, setSearchInput] = useState("");
 
   return (
@@ -55,7 +56,10 @@ export default function Sidebar({ conversations }: SidebarProps) {
           }}
         />
       </div>
-      <ConversationHistory conversations={conversations}></ConversationHistory>
+      <ConversationHistory
+        conversations={conversations}
+        onSelect={onSelect}
+      ></ConversationHistory>
     </div>
   );
 }

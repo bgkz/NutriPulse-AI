@@ -3,10 +3,12 @@ import "./ConversationHistory.css";
 import ConversationCard from "./ConversationCard";
 type ConversationHistoryProps = {
   conversations: Conversation[];
+  onSelect: (conversation: Conversation) => void;
 };
 
 export default function ConversationHistory({
   conversations,
+  onSelect,
 }: ConversationHistoryProps) {
   return (
     <div className="np-conversation-history">
@@ -39,7 +41,11 @@ export default function ConversationHistory({
       )}
       <div className="np-conversation-history-card">
         {conversations.map((conversation) => (
-          <ConversationCard key={conversation.id} conversation={conversation}/>
+          <ConversationCard
+            key={conversation.id}
+            conversation={conversation}
+            onSelect={onSelect}
+          />
         ))}
       </div>
     </div>
