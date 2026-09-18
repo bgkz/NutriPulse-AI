@@ -1,7 +1,8 @@
 ﻿import { useState } from "react";
 import "./Dashboard.css";
+import "./sidebar/Sidebar.css";
 import ChatTemplate from "./ChatTemplate";
-
+import Sidebar from "./sidebar/Sidebar";
 type DashboardProps = { token: string };
 
 export default function Dashboard({ token }: DashboardProps) {
@@ -83,7 +84,8 @@ export default function Dashboard({ token }: DashboardProps) {
 
   return (
     <div className="np-dashboard">
-      <header className="np-header">
+      <Sidebar></Sidebar>
+      {/* <header className="np-header">
         <a className="np-brand" href="#dashboard">
           <span className="np-logo" aria-hidden="true">
             ϟ
@@ -224,7 +226,7 @@ export default function Dashboard({ token }: DashboardProps) {
           <span>NutriPulse AI</span>
           <span>Mehr verstehen. Bewusster essen.</span>
         </footer>
-      </main>
+      </main> */}
     </div>
   );
 }

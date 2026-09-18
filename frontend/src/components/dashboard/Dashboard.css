@@ -11,6 +11,8 @@
   text-align: left;
   font-size: 14px;
   line-height: 1.6;
+  display: flex;
+  min-height: 100svh;
 }
 .np-dashboard * {
   box-sizing: border-box;
