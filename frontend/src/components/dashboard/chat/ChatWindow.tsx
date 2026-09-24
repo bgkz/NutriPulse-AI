@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import "./ChatWindow.css";
 import type { Conversation } from "@/types/conversation";
 import type { Message } from "@/types/message";
+import type { SendMessageResponse } from "@/types/chat";
 
 type ChatWindowProps = {
   activeConversation: Conversation | null;
   token: string;
+  onMessageSent: (sent_message: SendMessageResponse) => void;
 };
 
 type SendMessageRequest = {
@@ -17,6 +19,7 @@ type SendMessageRequest = {
 export default function ChatWindow({
   activeConversation,
   token,
+  onMessageSent,
 }: ChatWindowProps) {
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState("");
@@ -50,6 +53,8 @@ export default function ChatWindow({
       });
 
       if (response.ok) {
+        const sendMessageResponse: SendMessageResponse = await response.json();
+        onMessageSent(sendMessageResponse);
       }
 
       if (!response.ok) {

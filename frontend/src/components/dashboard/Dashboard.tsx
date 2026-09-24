@@ -5,6 +5,8 @@ import ChatTemplate from "./ChatTemplate";
 import Sidebar from "./sidebar/Sidebar";
 import ChatWindow from "./chat/ChatWindow";
 import type { Conversation } from "../../types/conversation";
+import type { Message } from "@/types/message";
+import type { SendMessageResponse } from "@/types/chat";
 type DashboardProps = { token: string };
 
 export default function Dashboard({ token }: DashboardProps) {
@@ -113,7 +115,14 @@ export default function Dashboard({ token }: DashboardProps) {
         conversations={conversations}
         onSelect={setActiveConversation}
       ></Sidebar>
-      <ChatWindow activeConversation={activeConversation} token={token} />
+      <ChatWindow
+        activeConversation={activeConversation}
+        token={token}
+        onMessageSent={(sendMessageResponse) => {
+          loadConversations(token);
+          setActiveConversation(sendMessageResponse.conversation);
+        }}
+      />
       {/* <header className="np-header">
         <a className="np-brand" href="#dashboard">
           <span className="np-logo" aria-hidden="true">

@@ -11,6 +11,10 @@ class ConversationRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
+    def get(self, conversation_id: UUID) -> ConversationEntry | None:
+        stmt = select(ConversationEntry).where(ConversationEntry.id == conversation_id)
+        return self.db.execute(statement=stmt).scalar_one_or_none()
+
     def add(self, conversation: ConversationEntry) -> ConversationEntry:
         try:
             self.db.add(conversation)

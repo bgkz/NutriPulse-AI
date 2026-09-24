@@ -15,6 +15,9 @@ class ChatService:
         self.conversation_service = conversation_service
         self.message_service = message_service
 
+    def get_conversation(self, conversation_id: UUID) -> ConversationEntry | None:
+        return self.conversation_service.get_conversation(conversation_id)
+
     def create_message(self, send_message_request: SendMessageRequest) -> MessageEntry:
         return self.message_service.create_message(send_message_request)
 
