@@ -21,9 +21,6 @@ def get_conversations(
         payload = decode_access_token(token)
         user_id = UUID(payload["sub"])
         conversation_service = ConversationService(ConversationRepository(db=db))
-
-        print(user_id)
-
         return conversation_service.get_conversations_by_user(user_id)
 
     except InvalidAccessTokenError as error:
