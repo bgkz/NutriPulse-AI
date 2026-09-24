@@ -5,11 +5,62 @@ import type { Message } from "@/types/message";
 
 type ChatWindowProps = {
   activeConversation: Conversation | null;
+  token: string;
 };
 
-export default function ChatWindow({ activeConversation }: ChatWindowProps) {
-  const [messageHistory, setMessageHistory] = useState<Message[] | []>([]);
+type SendMessageRequest = {
+  conversation_id: string | null;
+  role: "user" | "assistant";
+  content: string;
+};
+
+export default function ChatWindow({
+  activeConversation,
+  token,
+}: ChatWindowProps) {
+  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState("");
+
+  async function handleSendMessage(message: string) {
+    const tempMessage: Message = {
+      id: crypto.randomUUID(),
+      conversation_id: activeConversation?.id ?? null,
+      role: "user",
+      content: message,
+      created_at: new Date().toISOString(),
+    };
+
+    setMessageHistory((prev) => [...prev, tempMessage]);
+
+    // Das geht tatsächlich ans Backend
+    const request: SendMessageRequest = {
+      conversation_id: activeConversation?.id ?? null,
+      role: "user",
+      content: message,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/chat/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (response.ok) {
+      }
+
+      if (!response.ok) {
+        alert("Response not ok: " + response.json());
+      }
+    } catch (error) {
+      alert("ERROR: " + error);
+    } finally {
+      setUserMessage("");
+    }
+  }
 
   async function loadMessageHistory(activeConversation: Conversation | null) {
     if (activeConversation === null) return;
@@ -94,11 +145,21 @@ export default function ChatWindow({ activeConversation }: ChatWindowProps) {
             placeholder="Schreibe deine Nachricht..."
             value={userMessage}
             onChange={(event) => setUserMessage(event.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(userMessage);
+                setUserMessage("");
+              }
+            }}
           />
           <button
             type="button"
             className="chat-window-send"
             aria-label="Nachricht senden"
+            onClick={() => {
+              handleSendMessage(userMessage);
+            }}
           >
             ➜
           </button>

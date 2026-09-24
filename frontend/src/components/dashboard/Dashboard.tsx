@@ -113,7 +113,7 @@ export default function Dashboard({ token }: DashboardProps) {
         conversations={conversations}
         onSelect={setActiveConversation}
       ></Sidebar>
-      <ChatWindow activeConversation={activeConversation} />
+      <ChatWindow activeConversation={activeConversation} token={token} />
       {/* <header className="np-header">
         <a className="np-brand" href="#dashboard">
           <span className="np-logo" aria-hidden="true">

@@ -20,3 +20,11 @@ class UserAlreadyExist(Exception):
 
 class DocumentAlreadyExist(Exception):
     pass
+
+
+class ConversationAlreadyExist(Exception):
+    pass
+
+
+class MessageAlreadyExist(Exception):
+    pass

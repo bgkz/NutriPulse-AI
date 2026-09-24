@@ -8,5 +8,9 @@ class ConversationService:
     def __init__(self, conversation_repo: ConversationRepository) -> None:
         self.conversation_repo = conversation_repo
 
+    def create_conversation(self, user_id: UUID) -> ConversationEntry:
+        conversation = ConversationEntry(user_id=user_id)
+        return self.conversation_repo.add(conversation)
+
     def get_conversations_by_user(self, user_id: UUID) -> list[ConversationEntry]:
         return self.conversation_repo.get_conversations_by_user(user_id)
