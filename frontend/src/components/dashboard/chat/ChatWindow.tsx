@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./ChatWindow.css";
 import type { Conversation } from "@/types/conversation";
 import type { Message } from "@/types/message";
@@ -21,6 +21,7 @@ export default function ChatWindow({
   token,
   onMessageSent,
 }: ChatWindowProps) {
+  const messagesRef = useRef<HTMLDivElement>(null);
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -73,13 +74,29 @@ export default function ChatWindow({
         throw new Error("Die Nachricht konnte nicht gesendet werden.");
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Der Server ist nicht erreichbar.");
-      setMessageHistory((prev) => prev.filter((item) => item.id !== tempMessage.id));
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Der Server ist nicht erreichbar.",
+      );
+      setMessageHistory((prev) =>
+        prev.filter((item) => item.id !== tempMessage.id),
+      );
     } finally {
       setIsSending(false);
       setUserMessage("");
     }
   }
+
+  useEffect(() => {
+    const container = messagesRef.current;
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messageHistory]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,9 +109,11 @@ export default function ChatWindow({
     async function loadMessages() {
       if (!activeConversation) return;
       const response = await fetch(
-        `http://localhost:8000/messages/${activeConversation.id}`, options,
+        `http://localhost:8000/messages/${activeConversation.id}`,
+        options,
       );
-      if (!response.ok) throw new Error("Der Chatverlauf konnte nicht geladen werden.");
+      if (!response.ok)
+        throw new Error("Der Chatverlauf konnte nicht geladen werden.");
       const messages: Message[] = await response.json();
       if (!controller.signal.aborted) setMessageHistory(messages);
     }
@@ -103,17 +122,22 @@ export default function ChatWindow({
       try {
         if (checkJob && pendingJob) {
           const response = await fetch(
-            `http://localhost:8000/chat/jobs/${pendingJob.id}`, options,
+            `http://localhost:8000/chat/jobs/${pendingJob.id}`,
+            options,
           );
-          if (!response.ok) throw new Error("Der Job-Status konnte nicht geladen werden.");
+          if (!response.ok)
+            throw new Error("Der Job-Status konnte nicht geladen werden.");
           const job: { status: string } = await response.json();
           if (controller.signal.aborted) return;
 
           if (["failed", "stopped", "canceled"].includes(job.status)) {
-            throw new Error("Die KI-Antwort konnte nicht erstellt werden. Bitte versuche es erneut.");
+            throw new Error(
+              "Die KI-Antwort konnte nicht erstellt werden. Bitte versuche es erneut.",
+            );
           }
           if (job.status === "finished") {
-            if (activeConversation?.id === pendingJob.conversationId) await loadMessages();
+            if (activeConversation?.id === pendingJob.conversationId)
+              await loadMessages();
             if (!controller.signal.aborted) setPendingJob(null);
             return;
           }
@@ -126,7 +150,11 @@ export default function ChatWindow({
         }
       } catch (error) {
         if (controller.signal.aborted) return;
-        setError(error instanceof Error ? error.message : "Der Server ist nicht erreichbar.");
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Der Server ist nicht erreichbar.",
+        );
         setPendingJob(null);
       }
     }
@@ -157,7 +185,7 @@ export default function ChatWindow({
       )}
 
       {messageHistory.length > 0 && (
-        <div className="chat-window-messages">
+        <div className="chat-window-messages" ref={messagesRef}>
           {messageHistory.map((message) => (
             <article
               key={message.id}

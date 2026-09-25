@@ -12,15 +12,19 @@
   color: #17143f;
   box-shadow: 0 2px 12px #25205205;
   color-scheme: light;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chat-window-messages {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  flex: 1;
   width: 100%;
   padding: 8px 0 36px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .chat-message {
@@ -171,6 +175,10 @@
 
 .chat-window-input-row input:focus {
   outline: none;
+}
+
+.chat-window-composer {
+  flex-shrink: 0;
 }
 
 .chat-window .chat-window-composer p {
