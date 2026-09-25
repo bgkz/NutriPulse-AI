@@ -20,6 +20,7 @@ class LLMService:
             return response.output_text
         except Exception as error:
             print("An exception occurred in LLMService: ", error)
+            raise
 
     async def get_llm_response(self, data):
         try:
@@ -91,3 +92,4 @@ class LLMService:
             return response.output_parsed
         except Exception as e:
             print(str(e))
+            raise

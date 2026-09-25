@@ -41,8 +41,12 @@ def generate_llm_response(conversation_id: UUID):
         raise ValueError(f"Conversation {conversation_id} not found")
     if not active_conversation.title:
         messages = get_messages_by_conversation_id(conversation_id=conversation_id)
+        title_messages = [
+            {"role": message.role.value, "content": message.content}
+            for message in messages
+        ]
         conversation_title = generate_response(
-            input=messages, instructions=TITLE_PROMPT
+            input=title_messages, instructions=TITLE_PROMPT
         )
         update_conversation_title(
             conversation_id=conversation_id, target_title=conversation_title

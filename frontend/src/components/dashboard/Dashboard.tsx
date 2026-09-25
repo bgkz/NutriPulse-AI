@@ -43,6 +43,7 @@ export default function Dashboard({ token }: DashboardProps) {
           loadConversations(token);
           setActiveConversation(sendMessageResponse.conversation);
         }}
+        onResponseCompleted={() => loadConversations(token)}
       />
     </div>
   );

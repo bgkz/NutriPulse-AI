@@ -8,6 +8,7 @@ type ChatWindowProps = {
   activeConversation: Conversation | null;
   token: string;
   onMessageSent: (sent_message: SendMessageResponse) => void;
+  onResponseCompleted: () => void;
 };
 
 type SendMessageRequest = {
@@ -20,6 +21,7 @@ export default function ChatWindow({
   activeConversation,
   token,
   onMessageSent,
+  onResponseCompleted,
 }: ChatWindowProps) {
   const messagesRef = useRef<HTMLDivElement>(null);
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
@@ -138,6 +140,7 @@ export default function ChatWindow({
           if (job.status === "finished") {
             if (activeConversation?.id === pendingJob.conversationId)
               await loadMessages();
+            onResponseCompleted();
             if (!controller.signal.aborted) setPendingJob(null);
             return;
           }
