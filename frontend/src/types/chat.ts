@@ -4,4 +4,5 @@ import type { Message } from "./message";
 export type SendMessageResponse = {
   conversation: Conversation;
   message: Message;
+  job: string;
 };

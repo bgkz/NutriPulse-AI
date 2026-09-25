@@ -9,11 +9,12 @@ from app.repositories.message_repository import MessageRepository
 from app.schemas.chat import SendMessageRequest, SendMessageResponse
 from app.services.chat.chat_service import ChatService
 from app.services.conversation_service import ConversationService
-from app.services.llm.llm_service import LLMService
 from app.services.message_service import MessageService
 from exceptions.repository_exceptions import RepositoryError
 from exceptions.security_exceptions import InvalidAccessTokenError
 from fastapi import APIRouter, Depends, Header, HTTPException, status
+from rq.exceptions import NoSuchJobError
+from rq.job import Job
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/chat")
@@ -34,7 +35,6 @@ async def send_message(
 
         conversation_service = ConversationService(ConversationRepository(db=db))
         message_service = MessageService(MessageRepository(db=db))
-        llm_service = LLMService()
 
         chat_service = ChatService(conversation_service, message_service)
 
@@ -54,6 +54,7 @@ async def send_message(
             {
                 "conversation": active_conversation,
                 "message": message_created,
+                "job": job.id,
             }
         )
 
@@ -64,3 +65,18 @@ async def send_message(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(error)
         )
+
+
+@router.get("/jobs/{job_id}")
+def get_job(job_id: str):
+    try:
+        job = Job.fetch(job_id, connection=redis_connection)
+        if job.is_finished:
+            return {"status": job.get_status(), "result": job.result}
+        if job.is_failed:
+            return {"status": "failed", "error": job.exc_info}
+        if not job.is_finished:
+            return {"status": job.get_status(), "result": None}
+
+    except NoSuchJobError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))

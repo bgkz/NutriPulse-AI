@@ -23,8 +23,16 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState("");
-
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState("");
+  const [pendingJob, setPendingJob] = useState<{
+    id: string;
+    conversationId: string;
+  } | null>(null);
   async function handleSendMessage(message: string) {
+    if (!message.trim() || isSending || pendingJob) return;
+    setIsSending(true);
+    setError("");
     const tempMessage: Message = {
       id: crypto.randomUUID(),
       conversation_id: activeConversation?.id ?? null,
@@ -54,36 +62,81 @@ export default function ChatWindow({
 
       if (response.ok) {
         const sendMessageResponse: SendMessageResponse = await response.json();
+        setPendingJob({
+          id: sendMessageResponse.job,
+          conversationId: sendMessageResponse.conversation.id,
+        });
         onMessageSent(sendMessageResponse);
       }
 
       if (!response.ok) {
-        alert("Response not ok: " + response.json());
+        throw new Error("Die Nachricht konnte nicht gesendet werden.");
       }
     } catch (error) {
-      alert("ERROR: " + error);
+      setError(error instanceof Error ? error.message : "Der Server ist nicht erreichbar.");
+      setMessageHistory((prev) => prev.filter((item) => item.id !== tempMessage.id));
     } finally {
+      setIsSending(false);
       setUserMessage("");
     }
   }
 
-  async function loadMessageHistory(activeConversation: Conversation | null) {
-    if (activeConversation === null) return;
-    try {
-      const response = await fetch(
-        `http://localhost:8000/messages/${activeConversation.id}`,
-      );
-
-      const data: Message[] = await response.json();
-      setMessageHistory(data);
-    } catch (error) {
-      alert("Error occured while fetching conversations: " + error);
-    }
-  }
-
   useEffect(() => {
-    void loadMessageHistory(activeConversation);
-  }, [activeConversation]);
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    const options = {
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${token}` },
+    };
+
+    async function loadMessages() {
+      if (!activeConversation) return;
+      const response = await fetch(
+        `http://localhost:8000/messages/${activeConversation.id}`, options,
+      );
+      if (!response.ok) throw new Error("Der Chatverlauf konnte nicht geladen werden.");
+      const messages: Message[] = await response.json();
+      if (!controller.signal.aborted) setMessageHistory(messages);
+    }
+
+    async function updateChat(checkJob: boolean) {
+      try {
+        if (checkJob && pendingJob) {
+          const response = await fetch(
+            `http://localhost:8000/chat/jobs/${pendingJob.id}`, options,
+          );
+          if (!response.ok) throw new Error("Der Job-Status konnte nicht geladen werden.");
+          const job: { status: string } = await response.json();
+          if (controller.signal.aborted) return;
+
+          if (["failed", "stopped", "canceled"].includes(job.status)) {
+            throw new Error("Die KI-Antwort konnte nicht erstellt werden. Bitte versuche es erneut.");
+          }
+          if (job.status === "finished") {
+            if (activeConversation?.id === pendingJob.conversationId) await loadMessages();
+            if (!controller.signal.aborted) setPendingJob(null);
+            return;
+          }
+        } else {
+          await loadMessages();
+        }
+
+        if (pendingJob && !controller.signal.aborted) {
+          timer = setTimeout(() => void updateChat(true), 1000);
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setError(error instanceof Error ? error.message : "Der Server ist nicht erreichbar.");
+        setPendingJob(null);
+      }
+    }
+
+    void updateChat(false);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [activeConversation, pendingJob, token]);
 
   return (
     <section className="chat-window" aria-label="Chatverlauf">
@@ -124,6 +177,8 @@ export default function ChatWindow({
       )}
 
       <div className="chat-window-composer">
+        {error && <p role="alert">{error}</p>}
+        {pendingJob && <p role="status">Die KI erstellt deine Antwort …</p>}
         <div className="chat-window-input-row">
           <button
             type="button"
@@ -149,6 +204,7 @@ export default function ChatWindow({
             aria-label="Nachricht"
             placeholder="Schreibe deine Nachricht..."
             value={userMessage}
+            disabled={isSending || pendingJob !== null}
             onChange={(event) => setUserMessage(event.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -162,6 +218,7 @@ export default function ChatWindow({
             type="button"
             className="chat-window-send"
             aria-label="Nachricht senden"
+            disabled={isSending || pendingJob !== null || !userMessage.trim()}
             onClick={() => {
               handleSendMessage(userMessage);
             }}

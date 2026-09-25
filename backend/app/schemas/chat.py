@@ -14,5 +14,6 @@ class SendMessageRequest(BaseModel):
 class SendMessageResponse(BaseModel):
     conversation: ConversationResponse
     message: MessageResponse
+    job: str
 
     model_config = {"from_attributes": True}
