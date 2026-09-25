@@ -15,7 +15,5 @@ def get_messages(
     db: Session = Depends(get_db),  # noqa: B008
 ):
     message_service = MessageService(MessageRepository(db=db))
-
     messages = message_service.get_messages_by_conversation_id(UUID(conversation_id))
-    print(messages)
     return messages

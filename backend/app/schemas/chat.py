@@ -1,4 +1,3 @@
-import datetime
 import uuid
 
 from app.schemas.conversation import ConversationResponse

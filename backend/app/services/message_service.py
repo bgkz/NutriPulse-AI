@@ -9,13 +9,23 @@ class MessageService:
     def __init__(self, message_repo: MessageRepository) -> None:
         self.message_repo = message_repo
 
+    def add_message(
+        self, message: str, conversation_id: UUID, role: RoleType
+    ) -> MessageEntry:
+
+        message = MessageEntry(
+            conversation_id=conversation_id, role=role, content=message
+        )
+
+        return self.message_repo.add(message=message)
+
     def create_message(self, send_message_request: SendMessageRequest) -> MessageEntry:
         message_entry = MessageEntry(
             conversation_id=send_message_request.conversation_id,
             role=RoleType(send_message_request.role.casefold()),
             content=send_message_request.content,
         )
-        
+
         return self.message_repo.add(message_entry)
 
     def get_messages_by_conversation_id(

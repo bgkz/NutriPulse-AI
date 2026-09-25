@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from app.config import OPENAI_API_KEY
 from app.schemas.fitness import FitnessEntries
@@ -9,6 +10,16 @@ from openai import AsyncOpenAI
 class LLMService:
     def __init__(self):
         self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+    async def generate_response(self, input: Any) -> str:
+        try:
+            response = await self.client.responses.create(
+                model=settings.GPT_MODEL, input=input
+            )
+
+            return response.output_text
+        except Exception as error:
+            print("An exception occurred in LLMService: ", error)
 
     async def get_llm_response(self, data):
         try:

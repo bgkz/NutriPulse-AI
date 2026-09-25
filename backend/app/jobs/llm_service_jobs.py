@@ -1,10 +1,17 @@
 import asyncio
+from typing import Any
 
 from app.config import LLM_MODE, STORAGE_DIR
 from app.queue import redis_connection
 from app.schemas.fitness import FitnessEntries
 from app.services.llm.llm_service import LLMService
 from rq.job import Job
+
+
+def generate_response(input: Any) -> str:
+    llm_service = LLMService()
+
+    return asyncio.run(llm_service.generate_response(input=input))
 
 
 def parse_data_with_llm(previous_job_id: str):
