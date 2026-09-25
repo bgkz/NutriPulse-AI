@@ -8,10 +8,12 @@ from app.services.llm.llm_service import LLMService
 from rq.job import Job
 
 
-def generate_response(input: Any) -> str:
+def generate_response(input: Any, instructions: str | None) -> str:
     llm_service = LLMService()
 
-    return asyncio.run(llm_service.generate_response(input=input))
+    return asyncio.run(
+        llm_service.generate_response(input=input, instructions=instructions)
+    )
 
 
 def parse_data_with_llm(previous_job_id: str):

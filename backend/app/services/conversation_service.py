@@ -8,6 +8,14 @@ class ConversationService:
     def __init__(self, conversation_repo: ConversationRepository) -> None:
         self.conversation_repo = conversation_repo
 
+    def update_title(
+        self, conversation: ConversationEntry, target_title: str
+    ) -> ConversationEntry:
+
+        return self.conversation_repo.update_title(
+            conversation=conversation, target_title=target_title
+        )
+
     def get_conversation(self, conversation_id: UUID) -> ConversationEntry | None:
         return self.conversation_repo.get(conversation_id)
 

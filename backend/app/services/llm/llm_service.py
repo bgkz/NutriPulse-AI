@@ -11,10 +11,10 @@ class LLMService:
     def __init__(self):
         self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
-    async def generate_response(self, input: Any) -> str:
+    async def generate_response(self, input: Any, instructions: str | None) -> str:
         try:
             response = await self.client.responses.create(
-                model=settings.GPT_MODEL, input=input
+                model=settings.GPT_MODEL, input=input, instructions=instructions
             )
 
             return response.output_text
