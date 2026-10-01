@@ -14,6 +14,10 @@ class ConversationEntry(Base):
         default=uuid.uuid4,
     )
 
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("documents.id"), index=True, nullable=True
+    )
+
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id"),
         index=True,
