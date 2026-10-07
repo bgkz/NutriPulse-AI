@@ -7,6 +7,7 @@ from app.config import OPENAI_API_KEY
 from app.schemas.fitness import FitnessEntries
 from app.services.llm import settings
 from app.services.llm.sheet_tools import (
+    LIST_WORKSHEET_TOOL,
     READ_SHEET_TOOL,
     execute_sheet_tool,
     get_user_documents,
@@ -28,7 +29,7 @@ class LLMService:
                 if user_id is not None
                 else {}
             )
-            tools = [READ_SHEET_TOOL] if documents else []
+            tools = [READ_SHEET_TOOL, LIST_WORKSHEET_TOOL] if documents else []
             if user_id is not None:
                 instructions = (instructions or "") + (
                     "\nBeantworte Fragen zu persönlichen Sheet-Daten anhand von read_sheet. "

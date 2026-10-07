@@ -17,7 +17,30 @@ READ_SHEET_TOOL = {
             "document_id": {
                 "type": "string",
                 "description": "ID eines verfügbaren Dokuments aus dem Kontext.",
-            }
+            },
+            "worksheet_name": {
+                "type": "string",
+                "description": "Name des Tabellenblatts, beispielsweise Nutrition oder Workout.",
+            },
+        },
+        "required": ["document_id", "worksheet_name"],
+        "additionalProperties": False,
+    },
+    "strict": True,
+}
+
+
+LIST_WORKSHEET_TOOL = {
+    "type": "function",
+    "name": "list_worksheets",
+    "description": "Liest die Worksheets aus einem verknüpften Google Sheet.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "document_id": {
+                "type": "string",
+                "description": "ID eines verfügbaren Dokuments aus dem Kontext.",
+            },
         },
         "required": ["document_id"],
         "additionalProperties": False,
@@ -36,7 +59,7 @@ def get_user_documents(user_id: UUID) -> dict[str, str]:
 
 
 def execute_sheet_tool(name: str, arguments: str, documents: dict[str, str]) -> dict:
-    if name != "read_sheet":
+    if name not in ("read_sheet", "list_worksheets"):
         return {"error": "Unbekanntes Tool."}
 
     try:
@@ -48,10 +71,26 @@ def execute_sheet_tool(name: str, arguments: str, documents: dict[str, str]) -> 
     if not isinstance(document_id, str) or document_id not in documents:
         return {"error": "Dokument nicht gefunden oder kein Zugriff."}
 
-    try:
-        data = GoogleService().load(documents[document_id])
+    # Nur zum Lesen brauchen wir den Namen eines bestimmten Tabellenblatts.
+    if name == "read_sheet":
+        worksheet_name = args.get("worksheet_name")
+        if not isinstance(worksheet_name, str) or not worksheet_name.strip():
+            return {"error": "Bitte einen gültigen Tabellenblattnamen angeben."}
 
-        return {"document_id": document_id, "data": data}
+    try:
+        service = GoogleService()
+        url = documents[document_id]
+
+        if name == "list_worksheets":
+            names = service.get_worksheet_names(url)
+            return {"document_id": document_id, "worksheets": names}
+
+        data = service.load(url, worksheet_name)
+        return {
+            "document_id": document_id,
+            "worksheet_name": worksheet_name,
+            "data": data,
+        }
     except Exception:
         logging.getLogger(__name__).exception("Sheet konnte nicht geladen werden")
         return {
