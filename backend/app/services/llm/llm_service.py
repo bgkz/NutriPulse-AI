@@ -25,7 +25,8 @@ class LLMService:
             # Ohne user_id (z. B. beim Chat-Titel) werden keine Tools angeboten.
             documents = (
                 await asyncio.to_thread(get_user_documents, user_id)
-                if user_id is not None else {}
+                if user_id is not None
+                else {}
             )
             tools = [READ_SHEET_TOOL] if documents else []
             if user_id is not None:
@@ -40,7 +41,8 @@ class LLMService:
 
             history = (
                 [{"role": "user", "content": input}]
-                if isinstance(input, str) else list(input)
+                if isinstance(input, str)
+                else list(input)
             )
             # Höchstens fünf Runden, damit der Job nicht endlos Tools aufruft.
             for _ in range(5):
@@ -50,21 +52,34 @@ class LLMService:
                     instructions=instructions,
                     tools=tools,
                 )
-                calls = [item for item in response.output if item.type == "function_call"]
+                calls = [
+                    item for item in response.output if item.type == "function_call"
+                ]
                 if not calls:
+                    print("[LLM] Antwort ohne weiteren Tool-Aufruf", flush=True)
                     return response.output_text
 
                 # Alle Ausgaben erhalten, auch Reasoning-Elemente des Modells.
                 history.extend(response.output)
                 for call in calls:
+                    print(
+                        f"[LLM] Tool: {call.name} | Argumente: {call.arguments}",
+                        flush=True,
+                    )
                     result = await asyncio.to_thread(
                         execute_sheet_tool, call.name, call.arguments, documents
                     )
-                    history.append({
-                        "type": "function_call_output",
-                        "call_id": call.call_id,
-                        "output": json.dumps(result, ensure_ascii=False),
-                    })
+                    print(
+                        f"[Tool] {'Fehler' if 'error' in result else 'Erfolgreich'}",
+                        flush=True,
+                    )
+                    history.append(
+                        {
+                            "type": "function_call_output",
+                            "call_id": call.call_id,
+                            "output": json.dumps(result, ensure_ascii=False),
+                        }
+                    )
 
             return "Die Auswertung benötigt zu viele Schritte. Bitte grenze deine Frage ein."
         except Exception as error:

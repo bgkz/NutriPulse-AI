@@ -33,8 +33,3 @@ class DocumentsEntry(Base):
         default=datetime.date.today,
         server_default=sa.func.current_date(),
     )
-
-    processing_status: Mapped[StatusType] = mapped_column(
-        default=StatusType.PROCESSING,
-        server_default="PROCESSING",
-    )

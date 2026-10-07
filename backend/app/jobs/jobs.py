@@ -59,11 +59,11 @@ def generate_llm_response(conversation_id: UUID):
 
 def run_import(url: str, user_id: Any) -> dict[str, Any]:
     """Run the import as one RQ job; any exception fails the entire job."""
-    sheets_data = load_google_sheets_data(url)
+    # sheets_data = load_google_sheets_data(url)
     document = save_document_in_db(user_id, url)
-    parsed_data = parse_sheets_data(sheets_data)
-    save_fitness_entries(parsed_data, document)
-    return complete_document_import(document, parsed_data)
+    # parsed_data = parse_sheets_data(sheets_data)
+    # save_fitness_entries(parsed_data, document)
+    # return complete_document_import(document, parsed_data)
 
 
 def process_import(url: str, user_id: Any) -> Job:
