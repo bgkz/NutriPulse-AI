@@ -15,7 +15,8 @@ class GoogleService:
             spreadsheet = self.client.open_by_url(url)
 
             return [
-                worksheet.get_all_records() for worksheet in spreadsheet.worksheets()
+                worksheet.get_all_records(numericise_ignore=["all"])
+                for worksheet in spreadsheet.worksheets()
             ]
         except gspread.SpreadsheetNotFound as error:
             raise SpreadsheetNotFoundError(

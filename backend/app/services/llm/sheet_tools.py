@@ -10,7 +10,7 @@ from sqlalchemy import select
 READ_SHEET_TOOL = {
     "type": "function",
     "name": "read_sheet",
-    "description": "Liest aktuelle Fitnessdaten aus einem verknüpften Google Sheet.",
+    "description": "Liest Daten aus einem verknüpften Google Sheet.",
     "parameters": {
         "type": "object",
         "properties": {
