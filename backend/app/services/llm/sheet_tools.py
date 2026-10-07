@@ -50,7 +50,10 @@ def execute_sheet_tool(name: str, arguments: str, documents: dict[str, str]) -> 
 
     try:
         data = GoogleService().load(documents[document_id])
+
         return {"document_id": document_id, "data": data}
     except Exception:
         logging.getLogger(__name__).exception("Sheet konnte nicht geladen werden")
-        return {"error": "Sheet konnte nicht geladen werden. Bitte später erneut versuchen."}
+        return {
+            "error": "Sheet konnte nicht geladen werden. Bitte später erneut versuchen."
+        }
