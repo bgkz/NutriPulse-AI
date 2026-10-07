@@ -125,6 +125,7 @@
 }
 
 .chat-window-input-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -144,6 +145,78 @@
 }
 .chat-window-input-row input::placeholder {
   color: #8a90b5;
+}
+
+.chat-window-import {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1;
+  padding: 6px;
+  border: 1px solid #e7e8f4;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px #17143f12;
+}
+
+.chat-window-import-google-sheet {
+  width: min(400px, calc(100vw - 48px));
+  box-sizing: border-box;
+  margin: auto;
+  padding: 24px;
+  border: 1px solid #e7e8f4;
+  border-radius: 12px;
+  background: #fff;
+  color: #17143f;
+}
+
+.chat-window-import-google-sheet::backdrop {
+  background: #17143f66;
+}
+
+.chat-window-import-google-sheet h3 {
+  margin: 0 0 20px;
+}
+
+.chat-window-import-google-sheet input {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 8px 0 20px;
+  padding: 10px;
+  border: 1px solid #e7e8f4;
+  border-radius: 8px;
+}
+
+.chat-window-import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.chat-window-import-actions button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #f7f7fc;
+  color: #434773;
+}
+
+.chat-window-import-actions button:last-child {
+  background: #8b5cf6;
+  color: #fff;
+}
+
+.chat-window-import button {
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #f7f7fc;
+  color: #434773;
+  font-size: 14px;
+}
+
+.chat-window-import button:hover {
+  background: #eee7fc;
 }
 
 .chat-window-attach,

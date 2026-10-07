@@ -23,6 +23,9 @@ export default function ChatWindow({
   onMessageSent,
   onResponseCompleted,
 }: ChatWindowProps) {
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isGoogleSheetImportOpen, setIsGoogleSheetImportOpen] = useState(false);
+  const [googleSheetUrl, setGoogleSheetUrl] = useState("");
   const messagesRef = useRef<HTMLDivElement>(null);
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState("");
@@ -32,6 +35,38 @@ export default function ChatWindow({
     id: string;
     conversationId: string;
   } | null>(null);
+
+  async function handleGoogleSheetImport(
+    googleSheetUrl: string,
+    token: string,
+    activeConversation: Conversation | null,
+  ) {
+    try {
+      const response = await fetch("http://localhost:8000/documents/import", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          url: googleSheetUrl,
+          conversation_id: activeConversation?.id ?? null,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Handle Google Sheet Import Successfull");
+        setIsGoogleSheetImportOpen(false);
+      }
+
+      if (!response.ok) {
+        throw new Error("Import fehlgeschlagen");
+      }
+    } catch (error) {
+      alert("Error while handling Google Sheets Import: " + error);
+    }
+  }
+
   async function handleSendMessage(message: string) {
     if (!message.trim() || isSending || pendingJob) return;
     setIsSending(true);
@@ -215,6 +250,7 @@ export default function ChatWindow({
             type="button"
             className="chat-window-attach"
             aria-label="Datei anhängen"
+            onClick={() => setIsImportOpen((prev) => !prev)}
           >
             <svg
               width="20"
@@ -230,6 +266,20 @@ export default function ChatWindow({
               <path d="m21 11-8.5 8.5a6 6 0 0 1-8.5-8.5l9-9a4 4 0 0 1 5.7 5.7l-9 9a2 2 0 0 1-2.8-2.8l8.5-8.5" />
             </svg>
           </button>
+          {isImportOpen && (
+            <div className="chat-window-import">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsGoogleSheetImportOpen(true);
+                  setIsImportOpen(false);
+                }}
+              >
+                + Google Sheets importieren
+              </button>
+            </div>
+          )}
+
           <input
             type="text"
             aria-label="Nachricht"
@@ -262,6 +312,48 @@ export default function ChatWindow({
           verbinde später deine Daten.
         </p>
       </div>
+      {isGoogleSheetImportOpen && (
+        <dialog
+          className="chat-window-import-google-sheet"
+          ref={(dialog) => {
+            dialog?.showModal();
+          }}
+          onClose={() => setIsGoogleSheetImportOpen(false)}
+          aria-labelledby="sheet-import-title"
+        >
+          <h3 id="sheet-import-title">Google Sheets importieren</h3>
+          <label htmlFor="sheet-url">Google-Sheets-URL</label>
+          <input
+            id="sheet-url"
+            type="url"
+            placeholder="https://docs.google.com/spreadsheets/d/…"
+            autoFocus
+            value={googleSheetUrl}
+            onChange={(event) => setGoogleSheetUrl(event.target.value)}
+          />
+          <div className="chat-window-import-actions">
+            <button
+              type="button"
+              onClick={() => setIsGoogleSheetImportOpen(false)}
+            >
+              Abbrechen
+            </button>
+            {/* Die Import-Funktion wird hier später angebunden. */}
+            <button
+              type="button"
+              onClick={() =>
+                handleGoogleSheetImport(
+                  googleSheetUrl,
+                  token,
+                  activeConversation,
+                )
+              }
+            >
+              Importieren
+            </button>
+          </div>
+        </dialog>
+      )}
     </section>
   );
 }

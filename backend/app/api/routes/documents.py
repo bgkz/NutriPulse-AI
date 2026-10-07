@@ -15,7 +15,7 @@ from rq.job import Job
 router = APIRouter(prefix="/documents")
 
 
-@router.post("/", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/import", status_code=status.HTTP_202_ACCEPTED)
 def import_url(data: UrlImportRequest, authorization: str = Header()):
     try:
         token = authorization.removeprefix("Bearer ")
