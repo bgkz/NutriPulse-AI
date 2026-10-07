@@ -26,19 +26,21 @@ Regeln:
 
 
 def generate_llm_response(conversation_id: UUID):
+    active_conversation = get_conversation(conversation_id=conversation_id)
+    if active_conversation is None:
+        raise ValueError(f"Conversation {conversation_id} not found")
 
     messages = get_messages_by_conversation_id(conversation_id=conversation_id)
     llm_messages = [
         {"role": message.role.value, "content": message.content} for message in messages
     ]
-    response_text = generate_response(input=llm_messages, instructions=None)
+    response_text = generate_response(
+        input=llm_messages, instructions=None, user_id=active_conversation.user_id
+    )
     message_added = add_message_to_db(
         conversation_id=conversation_id, message=response_text, role=RoleType.ASSISTANT
     )
 
-    active_conversation = get_conversation(conversation_id=conversation_id)
-    if active_conversation is None:
-        raise ValueError(f"Conversation {conversation_id} not found")
     if not active_conversation.title:
         messages = get_messages_by_conversation_id(conversation_id=conversation_id)
         title_messages = [

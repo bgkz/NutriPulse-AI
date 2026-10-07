@@ -42,6 +42,11 @@ async def send_message(
             send_message_request.conversation_id
         )
 
+        if active_conversation and active_conversation.user_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found"
+            )
+
         if not active_conversation:
             active_conversation = chat_service.create_conversation(user_id=user_id)
 

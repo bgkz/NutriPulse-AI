@@ -1,5 +1,6 @@
 import asyncio
 from typing import Any
+from uuid import UUID
 
 from app.config import LLM_MODE, STORAGE_DIR
 from app.queue import redis_connection
@@ -8,11 +9,13 @@ from app.services.llm.llm_service import LLMService
 from rq.job import Job
 
 
-def generate_response(input: Any, instructions: str | None) -> str:
+def generate_response(
+    input: Any, instructions: str | None, user_id: UUID | None = None
+) -> str:
     llm_service = LLMService()
 
     return asyncio.run(
-        llm_service.generate_response(input=input, instructions=instructions)
+        llm_service.generate_response(input=input, instructions=instructions, user_id=user_id)
     )
 
 
