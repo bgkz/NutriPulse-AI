@@ -9,7 +9,6 @@ on:
 permissions:
   contents: read
 
-
 jobs:
   frontend:
     name: Frontend build
@@ -33,6 +32,9 @@ jobs:
 
       - name: Abhängigkeiten installieren
         run: npm ci
+
+      - name: Frontend lint prüfen
+        run: npm run lint -- --max-warnings=0
 
       - name: Frontend bauen
         run: npm run build
