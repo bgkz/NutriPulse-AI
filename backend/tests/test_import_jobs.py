@@ -12,11 +12,8 @@ from exceptions.google_service_exceptions import SpreadsheetNotFoundError
 
 
 STEPS = (
-    "load_google_sheets_data",
+    "verify_url",
     "save_document_in_db",
-    "parse_sheets_data",
-    "save_fitness_entries",
-    "complete_document_import",
 )
 
 
@@ -33,14 +30,7 @@ def test_success_passes_data_between_steps(steps):
     result = jobs.run_import("sheet-url", "user-id")
     steps[STEPS[0]].assert_called_once_with("sheet-url")
     steps[STEPS[1]].assert_called_once_with("user-id", "sheet-url")
-    steps[STEPS[2]].assert_called_once_with(steps[STEPS[0]].return_value)
-    steps[STEPS[3]].assert_called_once_with(
-        steps[STEPS[2]].return_value, steps[STEPS[1]].return_value
-    )
-    steps[STEPS[4]].assert_called_once_with(
-        steps[STEPS[1]].return_value, steps[STEPS[2]].return_value
-    )
-    assert result is steps[STEPS[4]].return_value
+    assert result is steps["save_document_in_db"].return_value
 
 
 @pytest.mark.parametrize("failed_step", range(len(STEPS)))
