@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import "./Dashboard.css";
 import "./sidebar/Sidebar.css";
 import Sidebar from "./sidebar/Sidebar";
@@ -26,8 +26,50 @@ export default function Dashboard({ token }: DashboardProps) {
     }
   }
 
+  const handleResponseCompleted = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:8000/conversations/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error("Chats konnten nicht geladen werden.");
+      }
+
+      const data: Conversation[] = await response.json();
+      setConversations(data);
+    } catch (error) {
+      alert("Fehler beim Laden der Chats: " + error);
+    }
+  }, [token]);
+
   useEffect(() => {
-    void loadConversations(token);
+    const controller = new AbortController();
+
+    async function loadInitialConversations() {
+      try {
+        const response = await fetch("http://localhost:8000/conversations/", {
+          signal: controller.signal,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          throw new Error("Chats konnten nicht geladen werden.");
+        }
+
+        const data: Conversation[] = await response.json();
+        if (!controller.signal.aborted) {
+          setConversations(data);
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        alert("Fehler beim Laden der Chats: " + error);
+      }
+    }
+
+    void loadInitialConversations();
+
+    return () => controller.abort();
   }, [token]);
 
   return (
@@ -43,7 +85,7 @@ export default function Dashboard({ token }: DashboardProps) {
           loadConversations(token);
           setActiveConversation(sendMessageResponse.conversation);
         }}
-        onResponseCompleted={() => loadConversations(token)}
+        onResponseCompleted={handleResponseCompleted}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "./ChatWindow.css";
 import type { Conversation } from "@/types/conversation";
 import type { Message } from "@/types/message";
@@ -141,77 +141,81 @@ export default function ChatWindow({
     }
   }
 
-  async function readChatStream(
-    jobId: string,
-    signal: AbortSignal,
-    onText: (text: string) => void,
-  ): Promise<void> {
-    const response = await fetch(
-      `http://localhost:8000/chat/jobs/${jobId}/stream`,
-      {
-        signal,
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
+  const readChatStream = useCallback(
+    async function readChatStream(
+      jobId: string,
+      signal: AbortSignal,
+      onText: (text: string) => void,
+    ): Promise<void> {
+      const response = await fetch(
+        `http://localhost:8000/chat/jobs/${jobId}/stream`,
+        {
+          signal,
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
 
-    if (!response.ok || !response.body) {
-      throw new Error("Der Antwort-Stream konnte nicht geöffnet werden.");
-    }
+      if (!response.ok || !response.body) {
+        throw new Error("Der Antwort-Stream konnte nicht geöffnet werden.");
+      }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
 
-    try {
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
-          throw new Error("Der Antwort-Stream wurde vorzeitig beendet.");
-        }
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            throw new Error("Der Antwort-Stream wurde vorzeitig beendet.");
+          }
 
-        buffer += decoder.decode(value, { stream: true });
+          buffer += decoder.decode(value, { stream: true });
 
-        let boundary: number;
-        while ((boundary = buffer.indexOf("\n\n")) !== -1) {
-          const frame = buffer.slice(0, boundary);
-          buffer = buffer.slice(boundary + 2);
-          const lines = frame.split("\n");
-          const event = lines
-            .find((line) => line.startsWith("event:"))
-            ?.slice(6)
-            .trim();
-          const data = lines
-            .filter((line) => line.startsWith("data:"))
-            .map((line) => line.slice(5).trimStart())
-            .join("\n");
+          let boundary: number;
+          while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+            const frame = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+            const lines = frame.split("\n");
+            const event = lines
+              .find((line) => line.startsWith("event:"))
+              ?.slice(6)
+              .trim();
+            const data = lines
+              .filter((line) => line.startsWith("data:"))
+              .map((line) => line.slice(5).trimStart())
+              .join("\n");
 
-          if (!data) continue;
-          const payload: { text?: unknown; message?: unknown } = JSON.parse(data);
+            if (!data) continue;
+            const payload: { text?: unknown; message?: unknown } =
+              JSON.parse(data);
 
-          if (event === "text") {
-            if (typeof payload.text !== "string") {
-              throw new Error("Ungültiger Text im Antwort-Stream.");
+            if (event === "text") {
+              if (typeof payload.text !== "string") {
+                throw new Error("Ungültiger Text im Antwort-Stream.");
+              }
+              onText(payload.text);
+            } else if (event === "done") {
+              return;
+            } else if (event === "error") {
+              throw new Error(
+                typeof payload.message === "string"
+                  ? payload.message
+                  : "KI-Antwort fehlgeschlagen.",
+              );
             }
-            onText(payload.text);
-          } else if (event === "done") {
-            return;
-          } else if (event === "error") {
-            throw new Error(
-              typeof payload.message === "string"
-                ? payload.message
-                : "KI-Antwort fehlgeschlagen.",
-            );
           }
         }
-      }
-    } finally {
-      try {
-        await reader.cancel();
       } finally {
-        reader.releaseLock();
+        try {
+          await reader.cancel();
+        } finally {
+          reader.releaseLock();
+        }
       }
-    }
-  }
+    },
+    [token],
+  );
 
   async function handleSendMessage(message: string) {
     if (!message.trim() || isSending || pendingJob) return;
@@ -306,13 +310,9 @@ export default function ChatWindow({
         await loadMessages();
         if (controller.signal.aborted || !pendingJob) return;
 
-        await readChatStream(
-          pendingJob.id,
-          controller.signal,
-          (text) => {
-            if (!controller.signal.aborted) setStreamedText(text);
-          },
-        );
+        await readChatStream(pendingJob.id, controller.signal, (text) => {
+          if (!controller.signal.aborted) setStreamedText(text);
+        });
 
         if (controller.signal.aborted) return;
         if (activeConversation?.id === pendingJob.conversationId) {
@@ -338,7 +338,13 @@ export default function ChatWindow({
     return () => {
       controller.abort();
     };
-  }, [activeConversation, pendingJob, token]);
+  }, [
+    activeConversation,
+    pendingJob,
+    token,
+    onResponseCompleted,
+    readChatStream,
+  ]);
 
   return (
     <section className="chat-window" aria-label="Chatverlauf">
