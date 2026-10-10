@@ -1,5 +1,6 @@
 import asyncio
 import json
+from collections.abc import Callable
 from typing import Any
 from uuid import UUID
 
@@ -20,7 +21,11 @@ class LLMService:
         self.client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
     async def generate_response(
-        self, input: Any, instructions: str | None, user_id: UUID | None = None
+        self,
+        input: Any,
+        instructions: str | None,
+        user_id: UUID | None = None,
+        on_delta: Callable[[str], None] | None = None,
     ) -> str:
         try:
             # Ohne user_id (z. B. beim Chat-Titel) werden keine Tools angeboten.
@@ -47,12 +52,18 @@ class LLMService:
             )
             # Höchstens fünf Runden, damit der Job nicht endlos Tools aufruft.
             for _ in range(5):
-                response = await self.client.responses.create(
+                async with self.client.responses.stream(
                     model=settings.GPT_MODEL,
                     input=history,
                     instructions=instructions,
                     tools=tools,
-                )
+                ) as stream:
+                    async for event in stream:
+                        if event.type == "response.output_text.delta":  # noqa: SIM102
+                            if on_delta is not None:
+                                on_delta(event.delta)
+
+                    response = await stream.get_final_response()
                 calls = [
                     item for item in response.output if item.type == "function_call"
                 ]

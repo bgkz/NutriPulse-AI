@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Callable
 from typing import Any
 from uuid import UUID
 
@@ -10,12 +11,20 @@ from rq.job import Job
 
 
 def generate_response(
-    input: Any, instructions: str | None, user_id: UUID | None = None
+    input: Any,
+    instructions: str | None,
+    user_id: UUID | None = None,
+    on_delta: Callable[[str], None] | None = None,
 ) -> str:
     llm_service = LLMService()
 
     return asyncio.run(
-        llm_service.generate_response(input=input, instructions=instructions, user_id=user_id)
+        llm_service.generate_response(
+            input=input,
+            instructions=instructions,
+            user_id=user_id,
+            on_delta=on_delta,
+        )
     )
 
 

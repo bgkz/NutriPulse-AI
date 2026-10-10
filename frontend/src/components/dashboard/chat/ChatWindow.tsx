@@ -28,6 +28,7 @@ export default function ChatWindow({
   onMessageSent,
   onResponseCompleted,
 }: ChatWindowProps) {
+  const [streamedText, setStreamedText] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isGoogleSheetImportOpen, setIsGoogleSheetImportOpen] = useState(false);
   const [googleSheetUrl, setGoogleSheetUrl] = useState("");
@@ -57,7 +58,11 @@ export default function ChatWindow({
     token: string,
     activeConversation: Conversation | null,
   ) {
-    if (importControllerRef.current && !importControllerRef.current.signal.aborted) return;
+    if (
+      importControllerRef.current &&
+      !importControllerRef.current.signal.aborted
+    )
+      return;
     const cleanedUrl = googleSheetUrl.trim();
 
     if (cleanedUrl.length == 0) {
@@ -73,7 +78,9 @@ export default function ChatWindow({
 
     function handleImportError(error: unknown) {
       if (controller.signal.aborted) return;
-      setError(error instanceof Error ? error.message : "Import fehlgeschlagen.");
+      setError(
+        error instanceof Error ? error.message : "Import fehlgeschlagen.",
+      );
       setImportStatus("");
       setIsImporting(false);
       importControllerRef.current = null;
@@ -88,7 +95,8 @@ export default function ChatWindow({
             headers: { Authorization: `Bearer ${token}` },
           },
         );
-        if (!response.ok) throw new Error("Der Import-Status konnte nicht geladen werden.");
+        if (!response.ok)
+          throw new Error("Der Import-Status konnte nicht geladen werden.");
         const job: { status: string } = await response.json();
         if (controller.signal.aborted) return;
 
@@ -133,8 +141,81 @@ export default function ChatWindow({
     }
   }
 
+  async function readChatStream(
+    jobId: string,
+    signal: AbortSignal,
+    onText: (text: string) => void,
+  ): Promise<void> {
+    const response = await fetch(
+      `http://localhost:8000/chat/jobs/${jobId}/stream`,
+      {
+        signal,
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
+    if (!response.ok || !response.body) {
+      throw new Error("Der Antwort-Stream konnte nicht geöffnet werden.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          throw new Error("Der Antwort-Stream wurde vorzeitig beendet.");
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let boundary: number;
+        while ((boundary = buffer.indexOf("\n\n")) !== -1) {
+          const frame = buffer.slice(0, boundary);
+          buffer = buffer.slice(boundary + 2);
+          const lines = frame.split("\n");
+          const event = lines
+            .find((line) => line.startsWith("event:"))
+            ?.slice(6)
+            .trim();
+          const data = lines
+            .filter((line) => line.startsWith("data:"))
+            .map((line) => line.slice(5).trimStart())
+            .join("\n");
+
+          if (!data) continue;
+          const payload: { text?: unknown; message?: unknown } = JSON.parse(data);
+
+          if (event === "text") {
+            if (typeof payload.text !== "string") {
+              throw new Error("Ungültiger Text im Antwort-Stream.");
+            }
+            onText(payload.text);
+          } else if (event === "done") {
+            return;
+          } else if (event === "error") {
+            throw new Error(
+              typeof payload.message === "string"
+                ? payload.message
+                : "KI-Antwort fehlgeschlagen.",
+            );
+          }
+        }
+      }
+    } finally {
+      try {
+        await reader.cancel();
+      } finally {
+        reader.releaseLock();
+      }
+    }
+  }
+
   async function handleSendMessage(message: string) {
     if (!message.trim() || isSending || pendingJob) return;
+    setStreamedText("");
     setIsSending(true);
     setError("");
     const tempMessage: Message = {
@@ -199,11 +280,10 @@ export default function ChatWindow({
       top: container.scrollHeight,
       behavior: "smooth",
     });
-  }, [messageHistory]);
+  }, [messageHistory, streamedText]);
 
   useEffect(() => {
     const controller = new AbortController();
-    let timer: ReturnType<typeof setTimeout>;
     const options = {
       signal: controller.signal,
       headers: { Authorization: `Bearer ${token}` },
@@ -221,37 +301,27 @@ export default function ChatWindow({
       if (!controller.signal.aborted) setMessageHistory(messages);
     }
 
-    async function updateChat(checkJob: boolean) {
+    async function updateChat() {
       try {
-        if (checkJob && pendingJob) {
-          const response = await fetch(
-            `http://localhost:8000/chat/jobs/${pendingJob.id}`,
-            options,
-          );
-          if (!response.ok)
-            throw new Error("Der Job-Status konnte nicht geladen werden.");
-          const job: { status: string } = await response.json();
-          if (controller.signal.aborted) return;
+        await loadMessages();
+        if (controller.signal.aborted || !pendingJob) return;
 
-          if (["failed", "stopped", "canceled"].includes(job.status)) {
-            throw new Error(
-              "Die KI-Antwort konnte nicht erstellt werden. Bitte versuche es erneut.",
-            );
-          }
-          if (job.status === "finished") {
-            if (activeConversation?.id === pendingJob.conversationId)
-              await loadMessages();
-            onResponseCompleted();
-            if (!controller.signal.aborted) setPendingJob(null);
-            return;
-          }
-        } else {
+        await readChatStream(
+          pendingJob.id,
+          controller.signal,
+          (text) => {
+            if (!controller.signal.aborted) setStreamedText(text);
+          },
+        );
+
+        if (controller.signal.aborted) return;
+        if (activeConversation?.id === pendingJob.conversationId) {
           await loadMessages();
         }
-
-        if (pendingJob && !controller.signal.aborted) {
-          timer = setTimeout(() => void updateChat(true), 1000);
-        }
+        if (controller.signal.aborted) return;
+        setStreamedText("");
+        setPendingJob(null);
+        onResponseCompleted();
       } catch (error) {
         if (controller.signal.aborted) return;
         setError(
@@ -259,14 +329,14 @@ export default function ChatWindow({
             ? error.message
             : "Der Server ist nicht erreichbar.",
         );
+        setStreamedText("");
         setPendingJob(null);
       }
     }
 
-    void updateChat(false);
+    void updateChat();
     return () => {
       controller.abort();
-      clearTimeout(timer);
     };
   }, [activeConversation, pendingJob, token]);
 
@@ -305,6 +375,14 @@ export default function ChatWindow({
               <p>{message.content}</p>
             </article>
           ))}
+          {pendingJob &&
+            activeConversation?.id === pendingJob.conversationId &&
+            streamedText && (
+              <article className="chat-message" aria-label="NutriPulse AI">
+                <div className="chat-message-sender">NutriPulse AI</div>
+                <p>{streamedText}</p>
+              </article>
+            )}
         </div>
       )}
 

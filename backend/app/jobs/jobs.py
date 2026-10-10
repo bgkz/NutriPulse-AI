@@ -9,7 +9,8 @@ from app.jobs.llm_service_jobs import generate_response, parse_sheets_data
 from app.jobs.message_jobs import add_message_to_db, get_messages_by_conversation_id
 from app.models.documents_entry import DocumentsEntry
 from app.models.message_entry import RoleType
-from app.queue import queue
+from app.queue import queue, redis_connection
+from rq import get_current_job
 from rq.job import Job
 
 TITLE_PROMPT = """
@@ -35,8 +36,25 @@ def generate_llm_response(conversation_id: UUID):
     llm_messages = [
         {"role": message.role.value, "content": message.content} for message in messages
     ]
+
+    job = get_current_job()
+    if job is None:
+        raise RuntimeError("Kein aktiver RQ-Job gefunden.")
+
+    stream_key = f"chat:stream:{job.id}"
+    redis_connection.set(stream_key, "", ex=3600)
+
+    def save_delta(delta: str) -> None:
+        with redis_connection.pipeline() as pipeline:
+            pipeline.append(stream_key, delta)
+            pipeline.expire(stream_key, 3600)
+            pipeline.execute()
+
     response_text = generate_response(
-        input=llm_messages, instructions=None, user_id=active_conversation.user_id
+        input=llm_messages,
+        instructions=None,
+        user_id=active_conversation.user_id,
+        on_delta=save_delta,
     )
     message_added = add_message_to_db(
         conversation_id=conversation_id, message=response_text, role=RoleType.ASSISTANT
