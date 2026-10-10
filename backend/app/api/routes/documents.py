@@ -31,8 +31,11 @@ def import_url(data: UrlImportRequest, authorization: str = Header()):
 
 
 @router.get("/jobs/{job_id}")
-def get_job(job_id: str):
+def get_job(job_id: str, authorization: str = Header()):
     try:
+        token = authorization.removeprefix("Bearer ")
+        decode_access_token(token)
+
         job = Job.fetch(job_id, connection=redis_connection)
         if job.is_finished:
             return {"status": job.get_status(), "result": job.result}
@@ -43,3 +46,6 @@ def get_job(job_id: str):
 
     except NoSuchJobError as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error))
+
+    except InvalidAccessTokenError as error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(error))
