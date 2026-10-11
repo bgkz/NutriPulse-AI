@@ -77,6 +77,7 @@ export default function Dashboard({ token }: DashboardProps) {
       <Sidebar
         conversations={conversations}
         onSelect={setActiveConversation}
+        onCreateChat={() => setActiveConversation(null)}
       ></Sidebar>
       <ChatWindow
         activeConversation={activeConversation}

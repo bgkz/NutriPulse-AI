@@ -5,9 +5,14 @@ import type { Conversation } from "../../../types/conversation";
 type SidebarProps = {
   conversations: Conversation[];
   onSelect: (conversation: Conversation) => void;
+  onCreateChat: () => void;
 };
 
-export default function Sidebar({ conversations, onSelect }: SidebarProps) {
+export default function Sidebar({
+  conversations,
+  onSelect,
+  onCreateChat,
+}: SidebarProps) {
   const [searchInput, setSearchInput] = useState("");
 
   return (
@@ -23,7 +28,11 @@ export default function Sidebar({ conversations, onSelect }: SidebarProps) {
           </span>
         </div>
       </div>
-      <button type="button" className="np-sidebar-create-chat-button">
+      <button
+        type="button"
+        className="np-sidebar-create-chat-button"
+        onClick={onCreateChat}
+      >
         <span className="np-sidebar-create-chat-icon" aria-hidden="true">
           +
         </span>
