@@ -30,7 +30,11 @@ def test_tool_result_is_sent_back_before_final_answer(monkeypatch):
         type="function_call", name="read_sheet",
         arguments='{"document_id": "doc-1", "worksheet_name": "Workout"}', call_id="call-1",
     )
-    reasoning = SimpleNamespace(type="reasoning")
+    reasoning_data = {"type": "reasoning", "id": "reasoning-1", "summary": []}
+    reasoning = SimpleNamespace(
+        type="reasoning",
+        model_dump=Mock(return_value={**reasoning_data, "status": "completed"}),
+    )
     create = Mock(side_effect=[
         FakeResponseStream(SimpleNamespace(output=[reasoning, call], output_text="")),
         FakeResponseStream(SimpleNamespace(output=[], output_text="Dein Gewicht ist gesunken.")),
@@ -49,7 +53,14 @@ def test_tool_result_is_sent_back_before_final_answer(monkeypatch):
     assert result == "Dein Gewicht ist gesunken."
     execute.assert_called_once_with("read_sheet", call.arguments, {"doc-1": "url"})
     history = create.call_args_list[1].kwargs["input"]
-    assert reasoning in history
+    reasoning.model_dump.assert_called_once_with(mode="json", exclude_none=True)
+    assert history[1] == reasoning_data
+    assert history[2] == {
+        "type": "function_call",
+        "call_id": "call-1",
+        "name": "read_sheet",
+        "arguments": call.arguments,
+    }
     assert history[-1]["call_id"] == "call-1"
     assert json.loads(history[-1]["output"]) == {"data": [{"weight": 80}]}
 
