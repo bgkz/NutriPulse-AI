@@ -294,7 +294,10 @@ export default function ChatWindow({
     };
 
     async function loadMessages() {
-      if (!activeConversation) return;
+      if (!activeConversation) {
+        setMessageHistory([]);
+        return;
+      }
       const response = await fetch(
         `http://localhost:8000/messages/${activeConversation.id}`,
         options,
