@@ -2,10 +2,9 @@ from typing import Any
 from uuid import UUID
 
 from app.jobs.conversation_jobs import get_conversation, update_conversation_title
-from app.jobs.document_jobs import complete_document_import, save_document_in_db
-from app.jobs.fitness_service_jobs import save_fitness_entries
-from app.jobs.google_sheet_jobs import load_google_sheets_data, verify_url
-from app.jobs.llm_service_jobs import generate_response, parse_sheets_data
+from app.jobs.document_jobs import save_document_in_db
+from app.jobs.google_sheet_jobs import verify_url
+from app.jobs.llm_service_jobs import generate_response
 from app.jobs.message_jobs import add_message_to_db, get_messages_by_conversation_id
 from app.models.documents_entry import DocumentsEntry
 from app.models.message_entry import RoleType
@@ -80,11 +79,7 @@ def run_import(url: str, user_id: Any) -> DocumentsEntry:
     """Run the import as one RQ job; any exception fails the entire job."""
     verify_url(url)
     return save_document_in_db(user_id, url)
-    # parsed_data = parse_sheets_data(sheets_data)
-    # save_fitness_entries(parsed_data, document)
-    # return complete_document_import(document, parsed_data)
 
 
 def process_import(url: str, user_id: Any) -> Job:
-    # The timeout now covers all five steps, previously separate RQ jobs.
     return queue.enqueue(run_import, url, user_id, job_timeout=900)
